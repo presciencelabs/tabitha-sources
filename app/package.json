@@ -4,7 +4,6 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
 		"check": "run-p -l format:check lint kit:check",
 		"format:check": "prettier --check .",
 		"format:write": "prettier --write .",
@@ -14,9 +13,8 @@
 		"build": "vite build",
 		"_build:watch": "vite build -w",
 		"_wrangler:dev": "wrangler pages dev .svelte-kit/cloudflare --port 8789",
-		"wrangler:list:db": "wrangler d1 list",
 		"pages:dev": "run-p -l _build:watch _wrangler:dev",
-		"clean": "rimraf vite.config.js.timestamp* .svelte-kit test-results",
+		"clean": "rimraf vite.config.js.timestamp* .svelte-kit",
 		"clean:powerwash": "pnpm clean && rimraf node_modules && pnpm install"
 	},
 	"dependencies": {
