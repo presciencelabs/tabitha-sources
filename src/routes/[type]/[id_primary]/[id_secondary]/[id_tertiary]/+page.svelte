@@ -1,6 +1,9 @@
 <script>
-    import { page } from '$app/stores'
+	import { SourceEntities } from '$lib'
+
+	/** @type {Source} */
+	export let data
 </script>
 
-<pre>{JSON.stringify($page.data, null, 2)}</pre>
+<SourceEntities source_entities={data.parsed_semantic_encoding} />
 

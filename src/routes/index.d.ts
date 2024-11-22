@@ -1,3 +1,3 @@
-type Source = {
+type SourceType = {
 	type: string
 }
