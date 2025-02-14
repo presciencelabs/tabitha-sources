@@ -17,8 +17,10 @@
 				<td><OntologyResult data={source_entity.pairing_concept} /></td>
 			{/if}
 		</tr>
-		<tr><td>
-			<Features {source_entity} classes={'ps-2'} />
-		</td></tr>
+		<tr>
+			<td>
+				<Features {source_entity} classes={'ps-2'} />
+			</td>
+		</tr>
 	</table>
 </span>
