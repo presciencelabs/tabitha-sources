@@ -8,7 +8,25 @@
 	const last_feature_to_display = features.findLastIndex(({ name }) => !name.startsWith('Spare'))
 
 	const features_to_display = features.slice(0, last_feature_to_display + 1)
-	const feature_codes_to_display = feature_codes.slice(0, last_feature_to_display + 1)
+	const feature_codes_to_display = get_feature_codes_to_display()
+
+	function get_feature_codes_to_display() {
+		if (source_entity.category !== 'Clause')
+			return feature_codes.slice(0, last_feature_to_display + 1)
+
+		// Collapse meaningless features on clauses
+		// C-EDp00NNNNNNNNNNNNN. -> C-EDp00..
+		// C-IDp00NNNNNNNNNBNNN. -> C-IDp00..B..
+		// starting with index 5, collapse all 'N' and '.' values, leaving any unique values
+		const feature_code_chars = [...feature_codes]
+		const collapse_start = 5
+		const next_meaningful_char = feature_code_chars.findIndex((char, index) => index > collapse_start && !['N', '.'].includes(char))
+		const last_meaningful_char = feature_code_chars.findLastIndex(char => !['N', '.'].includes(char))
+
+		return next_meaningful_char === -1
+			? `${feature_codes.slice(0, collapse_start)}..`
+			: `${feature_codes.slice(0, collapse_start)}..${feature_codes.slice(next_meaningful_char, last_meaningful_char + 1)}..`
+	}
 
 	const CATEGORY_ABBREVIATIONS = new Map([
 		['Noun', 'N'],

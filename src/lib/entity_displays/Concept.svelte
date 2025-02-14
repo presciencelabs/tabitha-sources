@@ -3,18 +3,18 @@
 	import OntologyResult from './OntologyResult.svelte'
 
 	export let source_entity: SourceEntity
-	const ontology_data = source_entity.ontology_result!	// will always be non-null at this point
+	const concept = source_entity.concept!	// will always be non-null at this point
 </script>
 
-<span class="inline-flex border-solid border-base-content px-3 py-6 text-lg tracking-normal">
+<span class="inline-flex border-solid border-base-content px-1 py-2 text-lg tracking-normal">
 	<table>
 		<tr>
 			<td>
-				<OntologyResult data={ontology_data} />
+				<OntologyResult data={concept} />
 			</td>
-			{#if source_entity.complex_pairing !== null}
+			{#if source_entity.pairing_concept !== null}
 				<td>/</td>
-				<td><OntologyResult data={source_entity.complex_pairing} /></td>
+				<td><OntologyResult data={source_entity.pairing_concept} /></td>
 			{/if}
 		</tr>
 		<tr><td>

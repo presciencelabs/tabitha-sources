@@ -56,7 +56,7 @@ export async function transform_semantic_encoding(semantic_encoding: string, db:
 
 		const category = CATEGORY_NAME_LOOKUP.get(category_code) || ''
 		const features = await transform_features(feature_codes, category_code, db)
-		const ontology_data = await get_ontology_data(value, category, feature_codes)
+		const ontology_data = await get_concept_data(value, category, feature_codes)
 
 		return {
 			category,
@@ -116,9 +116,9 @@ async function get_feature_value(category: CategoryName, position: number, featu
 	return result ?? { name: '', value: '' }
 }
 
-async function get_ontology_data(value: string, category: string, feature_codes: string): Promise<SourceOntologyData> {
+async function get_concept_data(value: string, category: string, feature_codes: string): Promise<SourceConceptData> {
 	if (!WORD_ENTITY_CATEGORIES.has(category)) {
-		return { ontology_result: null, complex_pairing: null }
+		return { concept: null, pairing_concept: null }
 	}
 
 	const sense = feature_codes[1]
@@ -129,31 +129,25 @@ async function get_ontology_data(value: string, category: string, feature_codes:
 	if (match) {
 		const [, stem, pairing_sense, pairing_stem] = match
 		return {
-			ontology_result: await fetch_ontology_data(category, stem, sense),
-			complex_pairing: await fetch_ontology_data(category, pairing_stem, pairing_sense),
+			concept: {
+				stem,
+				sense,
+				part_of_speech: category,
+			},
+			pairing_concept: {
+				stem: pairing_stem,
+				sense: pairing_sense,
+				part_of_speech: category,
+			},
 		}
 	}
 
 	return {
-		ontology_result: await fetch_ontology_data(category, value, sense),
-		complex_pairing: null,
+		concept: {
+			stem: value,
+			sense,
+			part_of_speech: category,
+		},
+		pairing_concept: null,
 	}
-}
-
-async function fetch_ontology_data(category: string, stem: string, sense: string): Promise<OntologyResult> {
-	const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=${stem}-${sense}&category=${category}`)
-
-	const DEFAULT_DATA = {
-		stem,
-		sense,
-		part_of_speech: category,
-		level: '',
-		gloss: '',
-	}
-
-	if (!response.ok) {
-		return DEFAULT_DATA
-	}
-
-	return (await response.json())[0] ?? DEFAULT_DATA
 }
