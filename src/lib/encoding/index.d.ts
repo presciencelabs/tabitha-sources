@@ -1,5 +1,6 @@
 type SourceEntity = {
 	category: CategoryName
+	category_abbr: string
 	value: string
 } & SourceFeatures & SourceConceptData
 

@@ -3,7 +3,7 @@
 	export let source_entity
 	export let classes = ''
 
-	const { category, feature_codes, features } = source_entity
+	const { category, category_abbr, feature_codes, features } = source_entity
 
 	const last_feature_to_display = features.findLastIndex(({ name }) => !name.startsWith('Spare'))
 
@@ -11,7 +11,7 @@
 	const feature_codes_to_display = get_feature_codes_to_display()
 
 	function get_feature_codes_to_display() {
-		if (source_entity.category !== 'Clause')
+		if (category !== 'Clause')
 			return feature_codes.slice(0, last_feature_to_display + 1)
 
 		// Collapse meaningless features on clauses
@@ -27,25 +27,6 @@
 			? `${feature_codes.slice(0, collapse_start)}..`
 			: `${feature_codes.slice(0, collapse_start)}..${feature_codes.slice(next_meaningful_char, last_meaningful_char + 1)}..`
 	}
-
-	const CATEGORY_ABBREVIATIONS = new Map([
-		['Noun', 'N'],
-		['Verb', 'V'],
-		['Adjective', 'Adj'],
-		['Adverb', 'Adv'],
-		['Adposition', 'Adp'],
-		['Conjunction', 'Con'],
-		['Phrasal', 'Phr'],
-		['Particle', 'Par'],
-		['Noun Phrase', 'NP'],
-		['Verb Phrase', 'VP'],
-		['Adjective Phrase', 'AdjP'],
-		['Adverb Phrase', 'AdvP'],
-		['Clause', 'C'],
-		['Paragraph', 'R'],
-		['Section', 'E'],
-		['period', 'period'],
-	])
 
 	/**
 	 * @param {EntityFeature} feature
@@ -70,7 +51,7 @@
 		</div>
 		<div role="button">
 			<span class="text-sm tracking-tight">
-				{CATEGORY_ABBREVIATIONS.get(category) ?? ''}-{feature_codes_to_display}
+				{category_abbr}-{feature_codes_to_display}
 			</span>
 		</div>
 	</div>

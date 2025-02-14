@@ -1,4 +1,3 @@
-import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
 import type { D1Database } from '@cloudflare/workers-types'
 
 const CATEGORY_NAME_LOOKUP = new Map([
@@ -18,6 +17,25 @@ const CATEGORY_NAME_LOOKUP = new Map([
 	['R', 'Paragraph'],
 	['E', 'Section'],
 	['.', 'period'],
+])
+
+const CATEGORY_ABBREVIATIONS = new Map([
+	['Noun', 'N'],
+	['Verb', 'V'],
+	['Adjective', 'Adj'],
+	['Adverb', 'Adv'],
+	['Adposition', 'Adp'],
+	['Conjunction', 'Con'],
+	['Phrasal', 'Phr'],
+	['Particle', 'Par'],
+	['Noun Phrase', 'NP'],
+	['Verb Phrase', 'VP'],
+	['Adjective Phrase', 'AdjP'],
+	['Adverb Phrase', 'AdvP'],
+	['Clause', 'C'],
+	['Paragraph', 'R'],
+	['Section', 'E'],
+	['period', 'period'],
 ])
 
 const WORD_ENTITY_CATEGORIES = new Set(['Noun', 'Verb', 'Adjective', 'Adverb', 'Adposition', 'Conjunction', 'Phrasal', 'Particle'])
@@ -55,11 +73,13 @@ export async function transform_semantic_encoding(semantic_encoding: string, db:
 		const value = entity_match[3]
 
 		const category = CATEGORY_NAME_LOOKUP.get(category_code) || ''
+		const category_abbr = CATEGORY_ABBREVIATIONS.get(category) || ''
 		const features = await transform_features(feature_codes, category_code, db)
 		const ontology_data = await get_concept_data(value, category, feature_codes)
 
 		return {
 			category,
+			category_abbr,
 			value,
 			...features,
 			...ontology_data,
