@@ -75,7 +75,7 @@ export async function transform_semantic_encoding(semantic_encoding: string, db:
 		const category = CATEGORY_NAME_LOOKUP.get(category_code) || ''
 		const category_abbr = CATEGORY_ABBREVIATIONS.get(category) || ''
 		const features = await transform_features(feature_codes, category_code, db)
-		const ontology_data = await get_concept_data(value, category, feature_codes)
+		const ontology_data = get_concept_data(value, category, feature_codes)
 
 		return {
 			category,
@@ -136,7 +136,7 @@ async function get_feature_value(category: CategoryName, position: number, featu
 	return result ?? { name: '', value: '' }
 }
 
-async function get_concept_data(value: string, category: string, feature_codes: string): Promise<SourceConceptData> {
+function get_concept_data(value: string, category: string, feature_codes: string): SourceConceptData {
 	if (!WORD_ENTITY_CATEGORIES.has(category)) {
 		return { concept: null, pairing_concept: null }
 	}
