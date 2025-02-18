@@ -26,6 +26,14 @@ type CategoryName = string
 type FeatureName = string
 type FeatureValue = string
 
+type DbFeature = {
+	category: CategoryName
+	position: Number
+	code: string
+	feature: FeatureName
+	value: FeatureValue
+}
+
 type EntityFeature = {
 	name: FeatureName,
 	value: FeatureValue,

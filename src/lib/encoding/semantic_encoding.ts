@@ -64,17 +64,19 @@ export async function transform_semantic_encoding(semantic_encoding: string, db:
 	const EXTRACT_TYPE_FEATURES_VALUES = /~\\wd ~\\tg (?:([\w.])-([^~]*))?~\\lu ([^~]+)/g
 	const entities = [...semantic_encoding.matchAll(EXTRACT_TYPE_FEATURES_VALUES)]
 
-	return await Promise.all(entities.map(decode_entity))
+	const all_features = await load_features(db)
+
+	return entities.map(decode_entity)
 
 	// ['~\wd ~\tg N-1A1SDAnK3NN........~\lu God', 'N', '1A1SDAnK3NN........', 'God']
-	async function decode_entity(entity_match: RegExpMatchArray): Promise<SourceEntity> {
+	function decode_entity(entity_match: RegExpMatchArray): SourceEntity {
 		const category_code = entity_match[1] ?? ''
 		const feature_codes = entity_match[2] ?? ''
 		const value = entity_match[3]
 
 		const category = CATEGORY_NAME_LOOKUP.get(category_code) || ''
 		const category_abbr = CATEGORY_ABBREVIATIONS.get(category) || ''
-		const features = await transform_features(feature_codes, category_code, db)
+		const features = transform_features(feature_codes, category_code, all_features)
 		const ontology_data = get_concept_data(value, category, feature_codes)
 
 		return {
@@ -87,7 +89,13 @@ export async function transform_semantic_encoding(semantic_encoding: string, db:
 	}
 }
 
-async function transform_features(feature_codes: string, category_code: string, db: D1Database): Promise<SourceFeatures> {
+async function load_features(db: D1Database): Promise<Map<string, DbFeature[]>> {
+	const sql = `SELECT * FROM Features`
+	const { results } = await db.prepare(sql).all<DbFeature>()
+	return Map.groupBy(results, ({ category, position }) => `${category}:${position}`)
+}
+
+function transform_features(feature_codes: string, category_code: string, all_features: Map<string, DbFeature[]>): SourceFeatures {
 	if (!feature_codes.length) {
 		return { feature_codes, features: [] }
 	}
@@ -108,9 +116,7 @@ async function transform_features(feature_codes: string, category_code: string, 
 	// This feature is not included in the 'Features' database, and so needs to be handled separately.
 	const is_noun = category === 'Noun'
 
-	const features = await Promise.all(
-		Array.from(feature_codes).map((feature_code, index) => get_feature_value(category, is_noun ? index - 1 : index, feature_code, db))
-	)
+	const features = [...feature_codes].map((feature_code, index) => get_feature_value(category, is_noun ? index - 1 : index, feature_code, all_features))
 	
 	if (is_noun) {
 		// at this point, entity_features[0] is an empty value
@@ -123,17 +129,13 @@ async function transform_features(feature_codes: string, category_code: string, 
 	}
 }
 
-async function get_feature_value(category: CategoryName, position: number, feature_code: string, db: D1Database): Promise<EntityFeature> {
-	const sql = `
-		SELECT feature AS name, value
-		FROM Features
-		WHERE category = ? AND position = ? AND code = ?
-	`
-
+function get_feature_value(category: CategoryName, position: number, feature_code: string, all_features: Map<string, DbFeature[]>): EntityFeature {
 	// Add 1 to position because the position in the db is not zero-based like an index
-	const result = await db.prepare(sql).bind(category, position + 1, feature_code).first<EntityFeature>()
-
-	return result ?? { name: '', value: '' }
+	const result = all_features.get(`${category}:${position + 1}`)?.find(({ code }) => code === feature_code)
+	return {
+		name: result?.feature ?? '',
+		value: result?.value ?? '',
+	}
 }
 
 function get_concept_data(value: string, category: string, feature_codes: string): SourceConceptData {
