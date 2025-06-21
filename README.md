@@ -57,4 +57,4 @@ pnpm precommit
 
 ## Error handling
 
-TODO: will integrate Sentry once https://github.com/getsentry/sentry-javascript/issues/8291 is fixed.
+TODO: will integrate Sentry once https://github.com/getsentry/sentry-javascript/issues/8291 is fixed.  Time to check again 6/21/25.
