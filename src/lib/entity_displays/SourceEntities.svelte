@@ -14,7 +14,9 @@
 	 * @param {SourceEntity} source_entity
 	 */
 	function clause_reducer(clauses, source_entity) {
-		if (['{', '|'].includes(source_entity.value)) {
+		if (source_entity.value === '|') {
+			clauses.push([])
+		} else if (source_entity.value === '{' && clauses.at(-1)?.at(-1)?.value !== '|') {
 			clauses.push([])
 		}
 		clauses.at(-1)?.push(source_entity)
