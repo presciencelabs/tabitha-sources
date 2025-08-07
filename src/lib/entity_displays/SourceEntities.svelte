@@ -35,7 +35,7 @@
 </script>
 
 {#each main_clauses as main_clause}
-	<div class="py-4">
+	<div class="py-3">
 		{#each main_clause as source_entity}
 			{@const component = component_filters.find(([filter]) => filter(source_entity))?.[1]}
 			<svelte:component this={component} {source_entity} />
