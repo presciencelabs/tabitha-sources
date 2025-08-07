@@ -20,20 +20,21 @@
 	}
 </script>
 
-<div class="flex justify-center max-w-full">
+<div class="flex justify-center max-w-full pb-5 join">
 	{#if nav_data.previous}
-		<a class="btn btn-secondary btn-sm" href="{create_url(nav_data.previous)}" title="{create_reference_string(nav_data.previous)}" target="_self" >
-			&lt;
+		<a class="btn btn-md join-item text-xl" href="{create_url(nav_data.previous)}" title="{create_reference_string(nav_data.previous)}" target="_self" >
+			«
 		</a>
 	{/if}
 
-	<div class="prose mx-5">
+	<!--'content-center' gets overwritten by 'prose', so use the element style to prioritize its effect-->
+	<div class="join-item px-5 prose bg-base-200 border border-base-300" style="align-content: center">
 		<h2>{create_reference_string(source)}</h2>
 	</div>
 
 	{#if nav_data.next}
-		<a class="btn btn-secondary btn-sm" href="{create_url(nav_data.next)}" title="{create_reference_string(nav_data.next)}" target="_self">
-			&gt;
+		<a class="btn btn-md join-item text-xl" href="{create_url(nav_data.next)}" title="{create_reference_string(nav_data.next)}" target="_self">
+			»
 		</a>
 	{/if}
 </div>

@@ -1,6 +1,6 @@
 // https://kit.svelte.dev/docs/routing#server
 import { error, redirect } from '@sveltejs/kit'
-import { parse_reference } from '$lib/ref_parser/ref_parser'
+import { parse_reference } from '$lib/data/ref_parser'
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ url: { searchParams } }) {

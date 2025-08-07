@@ -5,8 +5,11 @@
  *   "Genesis 1:1"
  *   "Psalm 23" -> Psalm 23:1
  *   "1 Corinthians 13:4"
+ * 
+ * @param {string} input 
+ * @returns {Reference | null}
  */
-export function parse_reference(input: string): Reference | null {
+export function parse_reference(input) {
 	const regex = /^([\dA-Za-z\s]+?)\s*(\d+)?(?::(\d+))?$/
 	const match = input.trim().match(regex)
 
@@ -14,7 +17,7 @@ export function parse_reference(input: string): Reference | null {
 
 	const [, id_primary, id_secondary, id_tertiary] = match
 
-	const ref: Reference = {
+	const ref = {
 		type: 'Bible',
 		id_primary: id_primary.trim(),
 		id_secondary: id_secondary ? id_secondary : '1',

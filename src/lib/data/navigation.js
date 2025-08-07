@@ -1,4 +1,3 @@
-import { D1Database } from '@cloudflare/workers-types'
 import { get_secondary_ids, get_source_data, get_tertiary_ids } from './read'
 
 /**
@@ -75,7 +74,7 @@ const bible_books = {
 }
 
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @param {Reference} reference
  * @returns {Promise<Reference|null>}
  */
@@ -125,7 +124,7 @@ export async function get_previous_reference(db, reference) {
 }
 
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @param {Reference} reference
  * @returns {Promise<Reference|null>}
  */
@@ -180,7 +179,7 @@ function find_book_index(book_name) {
 }
 
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @param {string} book_name
  * @returns {Promise<string|null>}
  */
@@ -193,7 +192,7 @@ async function get_last_chapter(db, book_name) {
 }
 
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @param {string} book_name
  * @param {string} chapter
  * @returns {Promise<string|null>}

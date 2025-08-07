@@ -14,6 +14,8 @@
 	 * @param {SourceEntity} source_entity
 	 */
 	function clause_reducer(clauses, source_entity) {
+		// Split the clauses so they're each on their own line.
+		// A paragraph marking should be put on the same line as the clause that follows.
 		if (source_entity.value === '|') {
 			clauses.push([])
 		} else if (source_entity.value === '{' && clauses.at(-1)?.at(-1)?.value !== '|') {

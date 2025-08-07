@@ -1,7 +1,5 @@
-import { D1Database } from '@cloudflare/workers-types'
-
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @returns {Promise<SourceType[]>}
  */
 export async function get_types(db) {
@@ -14,8 +12,9 @@ export async function get_types(db) {
 	const { results } = await db.prepare(sql).all()
 	return results
 }
+
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @param {string} type
  * @returns {Promise<PrimaryId[]>}
  */
@@ -30,8 +29,9 @@ export async function get_primary_ids(db, type) {
 	const { results } = await db.prepare(sql).bind(type).all()
 	return results
 }
+
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @param {string} type
  * @param {string} id_primary
  * @returns {Promise<SecondaryId[]>}
@@ -48,8 +48,9 @@ export async function get_secondary_ids(db, type, id_primary) {
 	const { results } = await db.prepare(sql).bind(type, id_primary).all()
 	return results
 }
+
 /**
- * @param {D1Database} db
+ * @param {import('@cloudflare/workers-types').D1Database} db
  * @param {string} type
  * @param {string} id_primary
  * @param {string} id_secondary
@@ -70,7 +71,7 @@ export async function get_tertiary_ids(db, type, id_primary, id_secondary) {
 }
 
 /**
- * @param {D1Database} db 
+ * @param {import('@cloudflare/workers-types').D1Database} db 
  * @param {Reference} reference 
  * @returns {Promise<Source|null>}
  */
@@ -86,6 +87,5 @@ export async function get_source_data(db, { type, id_primary, id_secondary, id_t
 
 	/** @type {Source|null} */
 	const result = await db.prepare(sql).bind(type, id_primary, id_secondary, id_tertiary).first()
-
 	return result
 }
