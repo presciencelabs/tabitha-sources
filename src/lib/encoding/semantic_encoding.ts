@@ -66,7 +66,7 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 
 	const all_features = await load_features(db)
 
-	return entities.map(decode_entity)
+	return entities.map(decode_entity).map(pair_boundaries)
 
 	// ['~\wd ~\tg N-1A1SDAnK3NN........~\lu God', 'N', '1A1SDAnK3NN........', 'God']
 	function decode_entity(entity_match: RegExpMatchArray): SourceEntity {
@@ -79,12 +79,18 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 		const features = transform_features(feature_codes, category_code, all_features)
 		const ontology_data = get_concept_data(value, category, feature_codes)
 
+		const boundary_data = {
+			boundary_pair: -1,
+			boundary_category: '',
+		}
+
 		return {
 			category,
 			category_abbr,
 			value,
 			...features,
 			...ontology_data,
+			...boundary_data,
 		}
 	}
 }
@@ -140,16 +146,16 @@ function get_feature_value(category: CategoryName, position: number, feature_cod
 
 function get_concept_data(value: string, category: string, feature_codes: string): SourceConceptData {
 	if (!WORD_ENTITY_CATEGORIES.has(category)) {
-		return { concept: null, pairing_concept: null }
+		return { concept: null, pairing_concept: null, pairing_type: '' }
 	}
 
 	const sense = feature_codes[1]
 
 	// follower/Adisciple -> follower / disciple-A
-	const EXTRACT_PAIRING = /^([^/]+)\/([A-Z])(.+)$/
+	const EXTRACT_PAIRING = /^(.+?)([\\/])([A-Z])(.+)$/
 	const match = value.match(EXTRACT_PAIRING)
 	if (match) {
-		const [, stem, pairing_sense, pairing_stem] = match
+		const [, stem, pairing_type, pairing_sense, pairing_stem] = match
 		return {
 			concept: {
 				stem,
@@ -161,6 +167,7 @@ function get_concept_data(value: string, category: string, feature_codes: string
 				sense: pairing_sense,
 				part_of_speech: category,
 			},
+			pairing_type,
 		}
 	}
 
@@ -171,5 +178,46 @@ function get_concept_data(value: string, category: string, feature_codes: string
 			part_of_speech: category,
 		},
 		pairing_concept: null,
+		pairing_type: '',
 	}
+}
+
+function pair_boundaries(entity: SourceEntity, index: number, entities: SourceEntity[]): SourceEntity {
+	const pair_type_map: Record<string, string> = {
+		'{': '}',
+		'}': '{',
+		'[': ']',
+		']': '[',
+		'(': ')',
+		')': '(',
+	}
+	const pair_type = pair_type_map[entity.value]
+	if (!pair_type) {
+		return entity
+	}
+
+	const search_offset = ['{', '[', '('].includes(entity.value) ? 1 : -1
+	const break_condition: (i: number) => boolean = search_offset < 0 ? i => i < 0 : i => i >= entities.length
+	
+	let i = index + search_offset
+	let nested = 0
+	while (!break_condition(i)) {
+		const next_entity = entities[i]
+		if (next_entity.value === entity.value) {
+			nested += 1
+		} else if (next_entity.value === pair_type && nested > 0) {
+			nested -= 1
+		} else if (next_entity.value === pair_type) {
+			break
+		}
+		i += search_offset
+	}
+
+	if (break_condition(i)) {
+		return entity
+	}
+	
+	entity.boundary_pair = i
+	entity.boundary_category = entities[i].category_abbr || entity.category_abbr
+	return entity
 }

@@ -4,7 +4,8 @@
 	/** @type {SourceEntity} */
 	export let source_entity
 
-		// TODO change character and size based on boundary type
+	const classes = `entity-${source_entity.boundary_category} ${source_entity.value === '}' ? 'text-7xl' : ''}`
+	const bracket_entity = { ...source_entity, value: ']' }
 </script>
 
-<Punctuation {source_entity} />
+<Punctuation source_entity={bracket_entity} {classes} />

@@ -5,6 +5,6 @@
 	export let classes = ''
 </script>
 
-<span class="px-1 pb-3 text-6xl font-thin {classes}">
+<span class="px-1 text-6xl font-thin {classes}">
 	{source_entity.value}
 </span>

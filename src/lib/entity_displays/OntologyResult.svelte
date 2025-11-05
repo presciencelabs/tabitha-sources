@@ -1,9 +1,9 @@
 <script>
 	import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
+	import HoverPopup from './HoverPopup.svelte'
 
 	/** @type {SourceConcept} */
 	export let data
-	export let classes=''
 
 	/**
 	 * @param {SourceConcept} concept
@@ -39,27 +39,21 @@
 	}
 </script>
 
-{#await fetch_ontology_data(data)}
-	<span class="badge badge-lg border-base-content badge-outline px-2 py-4 text-md {classes}">
-		<a class="link no-underline not-prose" href={get_ontology_url_for_link(data)} target="_blank">
+<HoverPopup>
+	{#snippet buttonContent()}
+		<a class="link-hover not-prose py-3" href={get_ontology_url_for_link(data)} target="_blank">
 			{`${data.stem}-${data.sense}`}
 		</a>
-	</span>
-{:then ontology_data}
-	{@const { stem, sense, level, gloss } = ontology_data}
-	<div class="dropdown dropdown-hover dropdown-bottom">
-		<div class="overflow-x-auto dropdown-content z-[1] text-sm p-2 shadow-xl rounded-box w-96 bg-base-200 tracking-normal">
-			{gloss}
+	{/snippet}
+	{#snippet dropdownContent()}
+		<div class="text-base-content">
+			{#await fetch_ontology_data(data)}
+				<span>Loading Ontology data...</span>
+			{:then ontology_data}
+				{@const {level, gloss} = ontology_data}
+				<span class="badge badge-outline L{level} badge-lg font-mono me-1">L{level}</span>
+				<span>{gloss}</span>
+			{/await}
 		</div>
-		<div role="button">
-			<span class="badge badge-lg border-base-content badge-outline px-2 py-4 text-md {`L${level}`} {classes}">
-				<a class="link no-underline not-prose" href={get_ontology_url_for_link(ontology_data)} target="_blank">
-					{`${stem}-${sense}`}
-				</a>
-			</span>
-		</div>
-
-		<!--This empty div makes join-item, if present, behave as desired-->
-		<div class="join-item"></div>
-	</div>
-{/await}
+	{/snippet}
+</HoverPopup>
