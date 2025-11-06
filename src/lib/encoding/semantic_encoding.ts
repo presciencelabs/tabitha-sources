@@ -80,7 +80,7 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 		const ontology_data = get_concept_data(value, category, feature_codes)
 
 		const boundary_data = {
-			boundary_pair: -1,
+			boundary_id: -1,
 			boundary_category: '',
 		}
 
@@ -195,8 +195,16 @@ function pair_boundaries(entity: SourceEntity, index: number, entities: SourceEn
 	if (!pair_type) {
 		return entity
 	}
+	
+	const is_boundary_start = ['{', '[', '('].includes(entity.value)
+	if (is_boundary_start) {
+		// for boundary starts, we don't need info about the end right now
+		entity.boundary_id = index
+		entity.boundary_category = entity.category_abbr
+		return entity
+	}
 
-	const search_offset = ['{', '[', '('].includes(entity.value) ? 1 : -1
+	const search_offset = is_boundary_start ? 1 : -1
 	const break_condition: (i: number) => boolean = search_offset < 0 ? i => i < 0 : i => i >= entities.length
 	
 	let i = index + search_offset
@@ -216,8 +224,7 @@ function pair_boundaries(entity: SourceEntity, index: number, entities: SourceEn
 	if (break_condition(i)) {
 		return entity
 	}
-	
-	entity.boundary_pair = i
-	entity.boundary_category = entities[i].category_abbr || entity.category_abbr
+	entity.boundary_id = i
+	entity.boundary_category = entities[i].category_abbr
 	return entity
 }

@@ -8,4 +8,6 @@
 	const bracket_entity = { ...source_entity, value: ']' }
 </script>
 
-<Punctuation source_entity={bracket_entity} {classes} />
+<div class="inline-flex">
+	<Punctuation source_entity={bracket_entity} {classes} />
+</div>

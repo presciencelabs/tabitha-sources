@@ -10,7 +10,7 @@ type SourceFeatures = {
 }
 
 type SourceBoundaryData = {
-	boundary_pair: number
+	boundary_id: number
 	boundary_category: string
 }
 
