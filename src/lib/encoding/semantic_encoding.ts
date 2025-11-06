@@ -66,7 +66,7 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 
 	const all_features = await load_features(db)
 
-	return entities.map(decode_entity).map(pair_boundaries)
+	return set_parent_ids(entities.map(decode_entity))
 
 	// ['~\wd ~\tg N-1A1SDAnK3NN........~\lu God', 'N', '1A1SDAnK3NN........', 'God']
 	function decode_entity(entity_match: RegExpMatchArray): SourceEntity {
@@ -88,6 +88,7 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 			category,
 			category_abbr,
 			value,
+			parent_ids: [],
 			...features,
 			...ontology_data,
 			...boundary_data,
@@ -182,49 +183,36 @@ function get_concept_data(value: string, category: string, feature_codes: string
 	}
 }
 
-function pair_boundaries(entity: SourceEntity, index: number, entities: SourceEntity[]): SourceEntity {
-	const pair_type_map: Record<string, string> = {
-		'{': '}',
-		'}': '{',
-		'[': ']',
-		']': '[',
-		'(': ')',
-		')': '(',
-	}
-	const pair_type = pair_type_map[entity.value]
-	if (!pair_type) {
-		return entity
-	}
-	
-	const is_boundary_start = ['{', '[', '('].includes(entity.value)
-	if (is_boundary_start) {
-		// for boundary starts, we don't need info about the end right now
-		entity.boundary_id = index
-		entity.boundary_category = entity.category_abbr
-		return entity
-	}
+function set_parent_ids(entities: SourceEntity[]): SourceEntity[] {
+	const parent_ids: number[] = []
 
-	const search_offset = is_boundary_start ? 1 : -1
-	const break_condition: (i: number) => boolean = search_offset < 0 ? i => i < 0 : i => i >= entities.length
-	
-	let i = index + search_offset
-	let nested = 0
-	while (!break_condition(i)) {
-		const next_entity = entities[i]
-		if (next_entity.value === entity.value) {
-			nested += 1
-		} else if (next_entity.value === pair_type && nested > 0) {
-			nested -= 1
-		} else if (next_entity.value === pair_type) {
-			break
+	for (const [i, entity] of entities.entries()) {
+		if (is_boundary_start(entity)) {
+			entity.parent_ids = [...parent_ids]
+
+			parent_ids.push(i)
+			entity.boundary_id = i
+			entity.boundary_category = entity.category_abbr
+
+		} else if (is_boundary_end(entity)) {
+			const last_parent_id = parent_ids.pop()!
+			entity.boundary_id = last_parent_id
+			entity.boundary_category = entities[last_parent_id].category_abbr
+
+			entity.parent_ids = [...parent_ids]
+
+		} else {
+			entity.parent_ids = [...parent_ids]
 		}
-		i += search_offset
 	}
 
-	if (break_condition(i)) {
-		return entity
+	return entities
+
+	function is_boundary_start(entity: SourceEntity) {
+		return ['{', '[', '('].includes(entity.value)
 	}
-	entity.boundary_id = i
-	entity.boundary_category = entities[i].category_abbr
-	return entity
+
+	function is_boundary_end(entity: SourceEntity) {
+		return ['}', ']', ')'].includes(entity.value)
+	}
 }

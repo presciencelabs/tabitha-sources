@@ -3,6 +3,7 @@
 	import BoundaryEnd from './BoundaryEnd.svelte'
 	import BoundaryStart from './BoundaryStart.svelte'
 	import Punctuation from './Punctuation.svelte'
+	import { onMount } from 'svelte'
 
 	/** @type {SourceEntity[]} */
 	export let source_entities
@@ -32,13 +33,44 @@
 		[({ concept }) => !!concept, Concept],
 		[() => true, Punctuation],
 	]
+
+	onMount(() => {
+		const all_entity_elems = document.querySelectorAll('.source-entity')
+
+		function clear_highlight() {
+			all_entity_elems.forEach(ed => ed.classList.remove('bg-base-300'))
+		}
+		/**
+		 * @param {Element} elem
+		*/
+		function add_highlight(elem) {
+			elem.classList.add('bg-base-300')
+		}
+
+		for (const entity_elem of all_entity_elems) {
+			entity_elem.addEventListener('mouseover', () => {
+				if (entity_elem.classList.contains('boundary-entity')) {
+					const id = entity_elem.getAttribute('data-boundary-id')
+					const child_elems = document.querySelectorAll(`[data-parent-ids~="${id}"], [data-boundary-id="${id}"]`)
+					child_elems.forEach(add_highlight)
+				} else {
+					add_highlight(entity_elem)
+				}
+			})
+			entity_elem.addEventListener('mouseout', clear_highlight)
+		}
+	})
 </script>
 
 {#each main_clauses as main_clause}
 	<div class="inline-flex flex-wrap py-3">
 		{#each main_clause as source_entity}
+			{@const is_boundary = source_entity.boundary_id >= 0}
+			{@const boundary_id = is_boundary ? source_entity.boundary_id : ''}
+			{@const parent_ids = source_entity.parent_ids.join(' ')}
 			{@const component = component_filters.find(([filter]) => filter(source_entity))?.[1]}
-			<div class="hover:bg-base-300 content-center h-20">
+
+			<div class="content-center h-20 source-entity {is_boundary ? 'boundary-entity' : ''}" data-boundary-id={boundary_id} data-parent-ids={parent_ids}>
 				<svelte:component this={component} {source_entity} />
 			</div>
 		{/each}

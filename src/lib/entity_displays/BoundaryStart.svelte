@@ -21,14 +21,14 @@
 	const bracket_entity = { ...source_entity, value: '[' }
 </script>
 
-<HoverPopup>
-	{#snippet buttonContent()}
-		<div class="inline-flex items-center pe-2">
-			<Punctuation source_entity={bracket_entity} {classes} />
+<div class="inline-flex items-center pe-2">
+	<Punctuation source_entity={bracket_entity} {classes} />
+	<HoverPopup>
+		{#snippet buttonContent()}
 			<span class="{color_class} font-semibold -ms-1">{source_entity.category_abbr}{feature_code_display}</span>
-		</div>
-	{/snippet}
-	{#snippet dropdownContent()}
-		<Features {source_entity} />
-	{/snippet}
-</HoverPopup>
+		{/snippet}
+		{#snippet dropdownContent()}
+			<Features {source_entity} />
+		{/snippet}
+	</HoverPopup>
+</div>
