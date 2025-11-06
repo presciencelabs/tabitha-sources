@@ -10,14 +10,14 @@
 <div class="badge badge-lg rounded-full border-base-content badge-outline mx-1 py-5 text-md entity-{source_entity.category_abbr}">
 	<HoverPopup>
 		{#snippet buttonContent()}
-			<span class="px-1 py-4">{source_entity.category_abbr}</span>
+			<span class="pe-2 py-4">{source_entity.category_abbr}</span>
 		{/snippet}
 		{#snippet dropdownContent()}
 			<Features {source_entity} classes="text-base-content" />
 		{/snippet}
 	</HoverPopup>
 
-	<div class="pe-1 py-4">
+	<div class="py-4">
 		{#if source_entity.pairing_concept === null}
 			<OntologyResult data={concept} />
 		{:else}
