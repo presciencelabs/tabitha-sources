@@ -66,7 +66,7 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 
 	const all_features = await load_features(db)
 
-	return set_parent_ids(entities.map(decode_entity))
+	return entities.map(decode_entity)
 
 	// ['~\wd ~\tg N-1A1SDAnK3NN........~\lu God', 'N', '1A1SDAnK3NN........', 'God']
 	function decode_entity(entity_match: RegExpMatchArray): SourceEntity {
@@ -79,19 +79,12 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 		const features = transform_features(feature_codes, category_code, all_features)
 		const ontology_data = get_concept_data(value, category, feature_codes)
 
-		const boundary_data = {
-			boundary_id: -1,
-			boundary_category: '',
-		}
-
 		return {
 			category,
 			category_abbr,
 			value,
-			parent_ids: [],
 			...features,
 			...ontology_data,
-			...boundary_data,
 		}
 	}
 }
@@ -183,36 +176,30 @@ function get_concept_data(value: string, category: string, feature_codes: string
 	}
 }
 
-function set_parent_ids(entities: SourceEntity[]): SourceEntity[] {
-	const parent_ids: number[] = []
+export function structure_semantic_encoding(entities: SourceEntity[]): PageSourceEntity[] {
+	const new_entities: PageSourceEntity[] = entities.map((entity, i) => ({ ...entity, id: i, parent_id: -1, boundary_category: ''}))
 
-	for (const [i, entity] of entities.entries()) {
+	const parent_id_stack: number[] = []
+	for (const [i, entity] of new_entities.entries()) {
+		entity.parent_id = parent_id_stack.at(-1) ?? -1
+
 		if (is_boundary_start(entity)) {
-			entity.parent_ids = [...parent_ids]
-
-			parent_ids.push(i)
-			entity.boundary_id = i
 			entity.boundary_category = entity.category_abbr
+			parent_id_stack.push(i)
 
 		} else if (is_boundary_end(entity)) {
-			const last_parent_id = parent_ids.pop()!
-			entity.boundary_id = last_parent_id
-			entity.boundary_category = entities[last_parent_id].category_abbr
-
-			entity.parent_ids = [...parent_ids]
-
-		} else {
-			entity.parent_ids = [...parent_ids]
+			entity.boundary_category = new_entities[entity.parent_id].boundary_category
+			parent_id_stack.pop()
 		}
 	}
 
-	return entities
+	return new_entities
+}
 
-	function is_boundary_start(entity: SourceEntity) {
-		return ['{', '[', '('].includes(entity.value)
-	}
+function is_boundary_start(entity: SourceEntity) {
+	return ['{', '[', '('].includes(entity.value)
+}
 
-	function is_boundary_end(entity: SourceEntity) {
-		return ['}', ']', ')'].includes(entity.value)
-	}
+function is_boundary_end(entity: SourceEntity) {
+	return ['}', ']', ')'].includes(entity.value)
 }

@@ -5,14 +5,17 @@
 	import Punctuation from './Punctuation.svelte'
 	import { onMount } from 'svelte'
 
-	/** @type {SourceEntity[]} */
+	/** @type {PageSourceEntity[]} */
 	export let source_entities
+
+	/** @type {HTMLElement[]} */
+	let entity_divs = []
 
 	const main_clauses = source_entities.reduce(clause_reducer, [])
 
 	/**
-	 * @param {SourceEntity[][]} clauses
-	 * @param {SourceEntity} source_entity
+	 * @param {PageSourceEntity[][]} clauses
+	 * @param {PageSourceEntity} source_entity
 	 */
 	function clause_reducer(clauses, source_entity) {
 		// Split the clauses so they're each on their own line.
@@ -26,51 +29,88 @@
 		return clauses
 	}
 
-	/** @type {[(entity: SourceEntity) => boolean, typeof Concept][]}*/
+	/**
+	 * @param {PageSourceEntity} entity
+	 */
+	function is_boundary_start({ value }) {
+		return ['{', '[', '('].includes(value)
+	}
+
+	/**
+	 * @param {PageSourceEntity} entity
+	 */
+	function is_boundary_end({ value }) {
+		return ['}', ']', ')'].includes(value)
+	}
+
+	/** @type {[(entity: PageSourceEntity) => boolean, typeof Concept][]}*/
 	const component_filters = [
-		[({ value }) => ['{', '[', '('].includes(value), BoundaryStart],
-		[({ value }) => ['}', ']', ')'].includes(value), BoundaryEnd],
+		[is_boundary_start, BoundaryStart],
+		[is_boundary_end, BoundaryEnd],
 		[({ concept }) => !!concept, Concept],
 		[() => true, Punctuation],
 	]
 
-	onMount(() => {
-		const all_entity_elems = document.querySelectorAll('.source-entity')
+	/**
+	 * @param {number} i
+	 */
+	function entity_mouseover(i) {
+		const [start, end_inclusive] = get_parent_range(i)
+		add_highlight(start, end_inclusive)
+	}
 
-		function clear_highlight() {
-			all_entity_elems.forEach(ed => ed.classList.remove('bg-base-300'))
-		}
-		/**
-		 * @param {Element} elem
-		*/
-		function add_highlight(elem) {
-			elem.classList.add('bg-base-300')
-		}
+	/**
+	 * @param {number} start
+	 * @param {number} end_inclusive
+	*/
+	function add_highlight(start, end_inclusive) {
+		entity_divs.slice(start, end_inclusive+1).forEach(elem => elem.classList.add('bg-base-300'))
+	}
 
-		for (const entity_elem of all_entity_elems) {
-			entity_elem.addEventListener('mouseover', () => {
-				if (entity_elem.classList.contains('boundary-entity')) {
-					const id = entity_elem.getAttribute('data-boundary-id')
-					const child_elems = document.querySelectorAll(`[data-parent-ids~="${id}"], [data-boundary-id="${id}"]`)
-					child_elems.forEach(add_highlight)
-				} else {
-					add_highlight(entity_elem)
-				}
-			})
-			entity_elem.addEventListener('mouseout', clear_highlight)
+	function clear_highlight() {
+		entity_divs.forEach(div => div.classList.remove('bg-base-300'))
+	}
+
+	/**
+	 * @param {number} i
+	 */
+	function entity_focus(i) {
+		// TODO show an 'Entity Inspect' sidebar
+	}
+
+	/**
+	 * @param {number} i
+	 * @returns {[number, number]}
+	 */
+	function get_parent_range(i) {
+		const entity = source_entities[i]
+		if (is_boundary_start(entity)) {
+			const last_id = source_entities.findLastIndex(e => e.parent_id === i)
+			return [i, last_id]
+
+		} else if (is_boundary_end(entity)) {
+			return [entity.parent_id, entity.id]
+
+		} else if (entity.parent_id >= 0) {
+			const last_id = source_entities.findLastIndex(e => e.parent_id === entity.parent_id)
+			return [entity.parent_id, last_id]
+
+		} else {
+			return [i, i]
 		}
-	})
+	}
 </script>
 
 {#each main_clauses as main_clause}
 	<div class="inline-flex flex-wrap py-3">
 		{#each main_clause as source_entity}
-			{@const is_boundary = source_entity.boundary_id >= 0}
-			{@const boundary_id = is_boundary ? source_entity.boundary_id : ''}
-			{@const parent_ids = source_entity.parent_ids.join(' ')}
+			{@const i = source_entity.id}
 			{@const component = component_filters.find(([filter]) => filter(source_entity))?.[1]}
-
-			<div class="content-center h-20 source-entity {is_boundary ? 'boundary-entity' : ''}" data-boundary-id={boundary_id} data-parent-ids={parent_ids}>
+			<div bind:this={entity_divs[i]} role="button" tabindex="0" class="content-center h-20 entity-{source_entity.boundary_category}"
+					on:mouseover={() => entity_mouseover(i)}
+					on:focus={() => entity_focus(i)}
+					on:mouseout={clear_highlight}
+					on:blur={() => {}} >
 				<svelte:component this={component} {source_entity} />
 			</div>
 		{/each}

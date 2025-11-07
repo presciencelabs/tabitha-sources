@@ -16,16 +16,14 @@
 		return []
 	}
 
-	const color_class = `entity-${source_entity.boundary_category}`
-	const classes = `${color_class} ${source_entity.value === '{' ? 'text-7xl' : ''}`
 	const bracket_entity = { ...source_entity, value: '[' }
 </script>
 
 <div class="inline-flex items-center pe-2">
-	<Punctuation source_entity={bracket_entity} {classes} />
+	<Punctuation source_entity={bracket_entity} classes={source_entity.value === '{' ? 'text-7xl' : ''} />
 	<HoverPopup>
 		{#snippet buttonContent()}
-			<span class="{color_class} font-semibold -ms-1">{source_entity.category_abbr}{feature_code_display}</span>
+			<span class="font-semibold -ms-1">{source_entity.category_abbr}{feature_code_display}</span>
 		{/snippet}
 		{#snippet dropdownContent()}
 			<Features {source_entity} />

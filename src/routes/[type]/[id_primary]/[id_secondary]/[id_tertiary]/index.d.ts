@@ -6,9 +6,12 @@ type Source = {
 	id_tertiary: string
 	phase_1_encoding: string
 	semantic_encoding: string
-	parsed_semantic_encoding: SourceEntity[]
 	comments: string
 	notes: string
+}
+
+type ApiSource = Source & {
+	parsed_semantic_encoding: SourceEntity[]
 }
 
 type NavData = {
@@ -17,6 +20,16 @@ type NavData = {
 }
 
 type PageData = {
-	source: Source
+	source: PageSource
 	nav_data: NavData
+}
+
+type PageSource = Source & {
+	parsed_semantic_encoding: PageSourceEntity[]
+}
+
+type PageSourceEntity = SourceEntity & {
+	id: number
+	parent_id: number
+	boundary_category: string
 }

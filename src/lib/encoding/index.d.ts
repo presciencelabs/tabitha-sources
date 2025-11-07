@@ -2,17 +2,11 @@ type SourceEntity = {
 	category: CategoryName
 	category_abbr: string
 	value: string
-	parent_ids: number[]
-} & SourceFeatures & SourceConceptData & SourceBoundaryData
+} & SourceFeatures & SourceConceptData
 
 type SourceFeatures = {
 	feature_codes: string
 	features: EntityFeature[]
-}
-
-type SourceBoundaryData = {
-	boundary_id: number
-	boundary_category: string
 }
 
 type SourceConceptData = {

@@ -1,6 +1,6 @@
 import { get_next_reference, get_previous_reference } from '$lib/data/navigation'
 import { get_source_data } from '$lib/data/read'
-import { transform_semantic_encoding } from '$lib/encoding/semantic_encoding'
+import { structure_semantic_encoding, transform_semantic_encoding } from '$lib/encoding/semantic_encoding'
 import { error } from '@sveltejs/kit'
 
 /** @type {import('./$types').PageServerLoad} */
@@ -13,12 +13,16 @@ export async function load({ locals: { db }, params: { type, id_primary, id_seco
 	}
 	reference.id_primary = source.id_primary	// get the proper capitalization
 
-	source.parsed_semantic_encoding = await transform_semantic_encoding(db, source.semantic_encoding)
+	const transformed_semantic_encoding = await transform_semantic_encoding(db, source.semantic_encoding)
+	const parsed_semantic_encoding = structure_semantic_encoding(transformed_semantic_encoding)
 	const previous = await get_previous_reference(db, reference)
 	const next = await get_next_reference(db, reference)
 
 	return {
-		source,
+		source: {
+			...source,
+			parsed_semantic_encoding,
+		},
 		nav_data: {
 			previous,
 			next,
