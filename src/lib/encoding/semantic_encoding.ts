@@ -196,6 +196,18 @@ export function structure_semantic_encoding(entities: SourceEntity[]): PageSourc
 	return new_entities
 }
 
+export function get_noun_list(source: Source): NounListEntry[] {
+	const noun_list_start = source.semantic_encoding.lastIndexOf('~|') // this indicates the start of the noun list
+	return source.semantic_encoding
+		.slice(noun_list_start + 2).trim()
+		.split('|')
+		.filter(entry => entry.length)
+		.map((entry, index) => ({
+			noun: `${entry.slice(1)}-${entry[0]}`,	// the sense is always the first letter
+			index: index < 9 ? `${index + 1}` : String.fromCharCode('A'.charCodeAt(0) + (index - 9)),
+		}))
+}
+
 function is_boundary_start(entity: SourceEntity) {
 	return ['{', '[', '('].includes(entity.value)
 }

@@ -3,10 +3,12 @@
 	import BoundaryEnd from './BoundaryEnd.svelte'
 	import BoundaryStart from './BoundaryStart.svelte'
 	import Punctuation from './Punctuation.svelte'
-	import { onMount } from 'svelte'
 
 	/** @type {PageSourceEntity[]} */
 	export let source_entities
+
+	/** @type {(entity: PageSourceEntity) => void}*/
+	export let on_select_entity
 
 	/** @type {HTMLElement[]} */
 	let entity_divs = []
@@ -75,7 +77,7 @@
 	 * @param {number} i
 	 */
 	function entity_focus(i) {
-		// TODO show an 'Entity Inspect' sidebar
+		on_select_entity(source_entities[i])
 	}
 
 	/**

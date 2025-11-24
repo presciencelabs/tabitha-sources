@@ -24,8 +24,14 @@ type PageData = {
 	nav_data: NavData
 }
 
+type NounListEntry = {
+	index: string
+	noun: string
+}
+
 type PageSource = Source & {
 	parsed_semantic_encoding: PageSourceEntity[]
+	noun_list: NounListEntry[]
 }
 
 type PageSourceEntity = SourceEntity & {
