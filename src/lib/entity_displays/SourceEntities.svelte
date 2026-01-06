@@ -8,7 +8,7 @@
 	export let source_entities
 
 	/** @type {(entity: PageSourceEntity) => void}*/
-	export let on_select_entity
+	export let on_select_entity = () => {}
 
 	/** @type {HTMLElement[]} */
 	let entity_divs = []

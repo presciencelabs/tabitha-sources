@@ -40,11 +40,12 @@
 
 <HoverPopup>
 	{#snippet buttonContent()}
-		{#if data.sense === 'A'}
+		{data.stem}-{data.sense}
+		<!-- {#if data.sense === 'A'}
 			{data.stem}
 		{:else}
 			{data.stem}-{data.sense}
-		{/if}
+		{/if} -->
 	{/snippet}
 	{#snippet dropdownContent()}
 		<div class="text-base-content">
