@@ -76,7 +76,7 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 
 		const category = CATEGORY_NAME_LOOKUP.get(category_code) || ''
 		const category_abbr = CATEGORY_ABBREVIATIONS.get(category) || ''
-		const features = transform_features(feature_codes, category_code, all_features)
+		const features = transform_features(feature_codes, category, all_features)
 		const ontology_data = get_concept_data(value, category, feature_codes)
 
 		return {
@@ -89,18 +89,50 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 	}
 }
 
+export async function transform_target_encoding(db: D1Database, semantic_encoding: string): Promise<TargetEntity[]> {
+	const EXTRACT_TYPE_FEATURES_VALUES = /~\\wd ~\\tg ([^~]+)?~\\lu ([^~]+)~\\z1 ?([^~]+)?/g
+	const entities = [...semantic_encoding.matchAll(EXTRACT_TYPE_FEATURES_VALUES)]
+
+	const all_features = await load_features(db)
+
+	return entities.map(decode_entity)
+
+	// ['~\wd ~\tg N-1A1SDAnK3NN........~\lu God~\z1 God', 'N-1A1SDAnK3NN........', 'God', 'God']
+	function decode_entity(entity_match: RegExpMatchArray): TargetEntity {
+		const category_code = entity_match[1]?.[0] || ''
+		const is_user_defined = category_code === '&'
+
+		const category = is_user_defined ? entity_match[1].slice(1) : CATEGORY_NAME_LOOKUP.get(category_code) || ''
+		const category_abbr = is_user_defined ? category : CATEGORY_ABBREVIATIONS.get(category) || ''
+		const raw_feature_codes = is_user_defined ? '' : entity_match[1]?.slice(2) || ''
+		const { feature_codes, features } = transform_features(raw_feature_codes, category, all_features)
+
+		const value = entity_match[2]
+		const concept = get_concept_data(value, category, raw_feature_codes).concept
+		const target = entity_match[3] || ''
+
+		return {
+			category,
+			category_abbr,
+			value,
+			concept,
+			target,
+			feature_codes,
+			features: features.map(({ value, name }) => ({ value, name: name || 'Unknown Lexical Feature' }))
+		}
+	}
+}
+
 async function load_features(db: D1Database): Promise<Map<string, DbFeature[]>> {
 	const sql = 'SELECT * FROM Features'
 	const { results } = await db.prepare(sql).all<DbFeature>()
 	return Map.groupBy(results, ({ category, position }) => `${category}:${position}`)
 }
 
-function transform_features(feature_codes: string, category_code: string, all_features: Map<string, DbFeature[]>): SourceFeatures {
+function transform_features(feature_codes: string, category: string, all_features: Map<string, DbFeature[]>): SourceFeatures {
 	if (!feature_codes.length) {
 		return { feature_codes, features: [] }
 	}
-
-	const category = CATEGORY_NAME_LOOKUP.get(category_code) ?? ''
 
 	if (WORD_ENTITY_CATEGORIES.has(category)) {
 		// The first feature is the semantic complexity level, which is set during generation.

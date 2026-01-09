@@ -49,3 +49,11 @@ type OntologyResult = {
 	// brief_gloss: string
 	// categorization: string[]
 }
+
+type TargetEntity = {
+	category: CategoryName
+	category_abbr: string
+	value: string
+	concept: SourceConcept|null
+	target: string
+} & SourceFeatures
