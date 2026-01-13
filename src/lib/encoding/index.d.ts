@@ -58,6 +58,16 @@ type TargetEntity = {
 	target: string
 } & SourceFeatures
 
+// This is a combination of SourceEntity and TargetEntity
+type EncodingEntity = {
+	category: string
+	category_abbr: string
+	value: string
+	concept: SourceConcept|null
+	pairing_concept?: SourceConcept|null
+	target?: string
+} & SourceFeatures
+
 type SimpleEncodingEntity = {
 	category: string
 	concept?: string

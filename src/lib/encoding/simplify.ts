@@ -1,12 +1,12 @@
 import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
 
-export async function simplify_encoding(entities: SourceEntity[]): Promise<SimpleEncodingEntity[]> {
+export async function simplify_encoding(entities: EncodingEntity[]): Promise<SimpleEncodingEntity[]> {
 	const cleaned = await clean_encoding(entities)
 	const structured = structure_encoding(cleaned)
 	return structured
 }
 
-async function clean_encoding(entities: SourceEntity[]): Promise<SimpleEncodingEntity[]> {
+async function clean_encoding(entities: EncodingEntity[]): Promise<SimpleEncodingEntity[]> {
 	const end_categories_map: Record<string, string> = {
 		')': 'Phrase End',
 		']': 'Clause End',
@@ -26,6 +26,9 @@ async function clean_encoding(entities: SourceEntity[]): Promise<SimpleEncodingE
 		if (entity.pairing_concept) {
 			entries.push(['pairing_concept', `${entity.pairing_concept.stem}-${entity.pairing_concept.sense}`])
 		}
+		if (entity.target) {
+			entries.push(['target', entity.target])
+		}
 		const simple_features = simplify_features(entity.features, entity.category)
 		if (Object.keys(simple_features).length) {
 			entries.push(['features', simple_features])
@@ -41,7 +44,7 @@ async function fetch_concept_gloss(concept: string, category: string): Promise<s
 	}
 	const result: OntologyResult[] = await response.json()
 	const gloss = result.length ? result[0].gloss : ''
-	return gloss.replace(/\(universal primitive|LDV|complex|complex alternate|inexplicable|proper name\) /, '')
+	return gloss.replace(/\((universal primitive|LDV|complex|complex alternate|inexplicable)\) /, '')
 }
 
 type RemovableFeature = [string|null, string|null, string|null]
