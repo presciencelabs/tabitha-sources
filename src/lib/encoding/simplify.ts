@@ -40,7 +40,8 @@ async function fetch_concept_gloss(concept: string, category: string): Promise<s
 		return ''
 	}
 	const result: OntologyResult[] = await response.json()
-	return result.length ? result[0].gloss : ''
+	const gloss = result.length ? result[0].gloss : ''
+	return gloss.replace(/\(universal primitive|LDV|complex|complex alternate|inexplicable|proper name\) /, '')
 }
 
 type RemovableFeature = [string|null, string|null, string|null]
