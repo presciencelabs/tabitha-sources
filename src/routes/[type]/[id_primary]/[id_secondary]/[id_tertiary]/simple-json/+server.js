@@ -5,7 +5,10 @@ import { simplify_encoding } from '$lib/encoding/simplify'
 import { error, json } from '@sveltejs/kit'
 
 /** @type {import('./$types').RequestHandler} */
-export async function GET({ locals: { db }, params: { type, id_primary, id_secondary, id_tertiary } }) {
+export async function GET({ locals: { db }, params: { type, id_primary, id_secondary, id_tertiary }, url: { searchParams } }) {
+	/** @type {boolean} */
+	const include_glosses = searchParams.get('glosses') === 'true'
+
 	const reference = { type, id_primary, id_secondary, id_tertiary }
 	const source = await get_source_data(db, reference)
 
@@ -14,7 +17,7 @@ export async function GET({ locals: { db }, params: { type, id_primary, id_secon
 	}
 	
 	const encoding = await transform_semantic_encoding(db, source.semantic_encoding)
-	const simple_encoding = await simplify_encoding(encoding)
+	const simple_encoding = await simplify_encoding(encoding, include_glosses)
 	return json({ encoding: simple_encoding})
 }
 

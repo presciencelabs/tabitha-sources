@@ -1,12 +1,12 @@
 import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
 
-export async function simplify_encoding(entities: EncodingEntity[]): Promise<SimpleEncodingEntity[]> {
-	const cleaned = await clean_encoding(entities)
+export async function simplify_encoding(entities: EncodingEntity[], include_glosses: boolean): Promise<SimpleEncodingEntity[]> {
+	const cleaned = await clean_encoding(entities, include_glosses)
 	const structured = structure_encoding(cleaned)
 	return structured
 }
 
-async function clean_encoding(entities: EncodingEntity[]): Promise<SimpleEncodingEntity[]> {
+async function clean_encoding(entities: EncodingEntity[], include_glosses: boolean): Promise<SimpleEncodingEntity[]> {
 	const end_categories_map: Record<string, string> = {
 		')': 'Phrase End',
 		']': 'Clause End',
@@ -18,9 +18,11 @@ async function clean_encoding(entities: EncodingEntity[]): Promise<SimpleEncodin
 		if (entity.concept) {
 			const concept = `${entity.concept.stem}-${entity.concept.sense}`
 			entries.push(['concept', concept])
-			const gloss = await fetch_concept_gloss(concept, entity.category)
-			if (gloss.length) {
-				entries.push(['concept_gloss', gloss])
+			if (include_glosses) {
+				const gloss = await fetch_concept_gloss(concept, entity.category)
+				if (gloss.length) {
+					entries.push(['concept_gloss', gloss])
+				}
 			}
 		}
 		if (entity.pairing_concept) {
