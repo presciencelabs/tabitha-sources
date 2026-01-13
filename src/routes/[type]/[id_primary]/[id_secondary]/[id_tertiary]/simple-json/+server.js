@@ -14,7 +14,7 @@ export async function GET({ locals: { db }, params: { type, id_primary, id_secon
 	}
 	
 	const encoding = await transform_semantic_encoding(db, source.semantic_encoding)
-	const simple_encoding = simplify_encoding(encoding)
+	const simple_encoding = await simplify_encoding(encoding)
 	return json({ encoding: simple_encoding})
 }
 

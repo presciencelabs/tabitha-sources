@@ -1,22 +1,27 @@
+import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
 
-export function simplify_encoding(entities: SourceEntity[]): SimpleEncodingEntity[] {
-	const cleaned = clean_encoding(entities)
+export async function simplify_encoding(entities: SourceEntity[]): Promise<SimpleEncodingEntity[]> {
+	const cleaned = await clean_encoding(entities)
 	const structured = structure_encoding(cleaned)
 	return structured
 }
 
-function clean_encoding(entities: SourceEntity[]) {
+async function clean_encoding(entities: SourceEntity[]): Promise<SimpleEncodingEntity[]> {
 	const end_categories_map: Record<string, string> = {
 		')': 'Phrase End',
 		']': 'Clause End',
 		'}': 'Clause Sentence End',
 	}
-	return entities.map(entity => {
+	return Promise.all(entities.map(async entity => {
 		const entries: [string, any][] = []
 		entries.push(['category', end_categories_map[entity.value] ?? entity.category])
 		if (entity.concept) {
-			entries.push(['concept', `${entity.concept.stem}-${entity.concept.sense}`])
-			// entries.push(['concept_gloss', ''])  // TODO?
+			const concept = `${entity.concept.stem}-${entity.concept.sense}`
+			entries.push(['concept', concept])
+			const gloss = await fetch_concept_gloss(concept, entity.category)
+			if (gloss.length) {
+				entries.push(['concept_gloss', gloss])
+			}
 		}
 		if (entity.pairing_concept) {
 			entries.push(['pairing_concept', `${entity.pairing_concept.stem}-${entity.pairing_concept.sense}`])
@@ -26,7 +31,16 @@ function clean_encoding(entities: SourceEntity[]) {
 			entries.push(['features', simple_features])
 		}
 		return Object.fromEntries(entries) as SimpleEncodingEntity
-	})
+	}))
+}
+
+async function fetch_concept_gloss(concept: string, category: string): Promise<string> {
+	const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=${concept}&category=${category}`)
+	if (!response.ok) {
+		return ''
+	}
+	const result: OntologyResult[] = await response.json()
+	return result.length ? result[0].gloss : ''
 }
 
 type RemovableFeature = [string|null, string|null, string|null]
