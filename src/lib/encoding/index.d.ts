@@ -57,3 +57,12 @@ type TargetEntity = {
 	concept: SourceConcept|null
 	target: string
 } & SourceFeatures
+
+type SimpleEncodingEntity = {
+	category: string
+	concept?: string
+	pairing_concept?: string
+	target?: string
+	features?: EntityFeature[]
+	children?: SimpleEncodingEntity[]
+}
