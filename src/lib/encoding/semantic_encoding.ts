@@ -140,10 +140,12 @@ async function load_target_features(project: string): Promise<Map<string, DbFeat
 		return undefined
 	}
 	const results = await response.json() as ApiFeatureResult
-	const max_source_position = Math.max(0, ...results.source.map(f => f.position))
+
+	const categories = [...new Set(results.source.map(f => f.category))]
+	const max_source_positions_by_category = new Map(categories.map(c => [c, Math.max(0, ...results.source.filter(f => f.category === c).map(f => f.position))]))
 	const features = [
 		...results.source,
-		...results.lexical.map(f => ({ ...f, position: f.position + max_source_position }))
+		...results.lexical.map(f => ({ ...f, position: f.position + (max_source_positions_by_category.get(f.category) || 0) }))
 	]
 	return Map.groupBy(features, ({ category, position }) => `${category}:${position}`)
 }
