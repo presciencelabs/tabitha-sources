@@ -12,7 +12,7 @@ async function clean_encoding(entities: EncodingEntity[], include_glosses: boole
 		']': 'Clause End',
 		'}': 'Clause Sentence End',
 	}
-	return Promise.all(entities.map(async entity => {
+	return await Promise.all(entities.map(async entity => {
 		const entries: [string, any][] = []
 		entries.push(['category', end_categories_map[entity.value] ?? entity.category])
 		if (entity.concept) {
