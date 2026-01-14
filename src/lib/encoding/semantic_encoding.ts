@@ -1,4 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types'
+import { PUBLIC_TARGETS_API_HOST } from '$env/static/public'
 
 const CATEGORY_NAME_LOOKUP = new Map([
 	['N', 'Noun'],
@@ -89,11 +90,11 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 	}
 }
 
-export async function transform_target_encoding(db: D1Database, semantic_encoding: string): Promise<TargetEntity[]> {
+export async function transform_target_encoding(db: D1Database, semantic_encoding: string, project: string): Promise<TargetEntity[]> {
 	const EXTRACT_TYPE_FEATURES_VALUES = /~\\wd ~\\tg ([^~]+)?~\\lu ([^~]+)~\\z1 ?([^~]+)?/g
 	const entities = [...semantic_encoding.matchAll(EXTRACT_TYPE_FEATURES_VALUES)]
 
-	const all_features = await load_features(db)
+	const all_features = await load_target_features(project) || await load_features(db)
 
 	return entities.map(decode_entity)
 
@@ -127,6 +128,23 @@ async function load_features(db: D1Database): Promise<Map<string, DbFeature[]>> 
 	const sql = 'SELECT * FROM Features'
 	const { results } = await db.prepare(sql).all<DbFeature>()
 	return Map.groupBy(results, ({ category, position }) => `${category}:${position}`)
+}
+
+async function load_target_features(project: string): Promise<Map<string, DbFeature[]>|undefined> {
+	if (!project.length) {
+		return undefined
+	}
+	const response = await fetch(`${PUBLIC_TARGETS_API_HOST}/${project}/lookup/features`)
+	if (!response.ok) {
+		console.error(`Failed to load target features for project ${project}: ${response.status} ${response.statusText}`)
+		return undefined
+	}
+	const results = await response.json() as ApiFeatureResult
+	const features = [
+		...results.source,
+		...results.lexical.map(f => ({ ...f, position: f.position + results.source.length }))
+	]
+	return Map.groupBy(features, ({ category, position }) => `${category}:${position}`)
 }
 
 function transform_features(feature_codes: string, category: string, all_features: Map<string, DbFeature[]>): SourceFeatures {

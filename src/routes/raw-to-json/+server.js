@@ -9,11 +9,13 @@ export async function GET({ locals: { db }, url: { searchParams } }) {
 	const raw_encoding = searchParams.get('raw_encoding') ?? ''
 	/** @type {boolean} */
 	const simple = searchParams.get('simple') === 'true'
+	/** @type {string} */
+	const project = searchParams.get('project') ?? ''
 	
 	const is_target = raw_encoding.includes('~\\z1')
 	/** @type {EncodingEntity[]} */
 	const parsed_encoding = is_target
-		? await transform_target_encoding(db, raw_encoding)
+		? await transform_target_encoding(db, raw_encoding, project)
 		: await transform_semantic_encoding(db, raw_encoding)
 
 	return simple

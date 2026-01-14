@@ -39,6 +39,12 @@ type EntityFeature = {
 	value: FeatureValue,
 }
 
+type ApiFeature = DbFeature
+type ApiFeatureResult = {
+	source: ApiFeature[]
+	lexical: ApiFeature[]
+}
+
 type OntologyResult = {
 	stem: string
 	sense: string
