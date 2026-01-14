@@ -19,6 +19,6 @@ export async function GET({ locals: { db }, url: { searchParams } }) {
 		: await transform_semantic_encoding(db, raw_encoding)
 
 	return simple
-		? json({ parsed_encoding: simplify_encoding(parsed_encoding, false) })
+		? json({ parsed_encoding: await simplify_encoding(parsed_encoding, false) })
 		: json({ parsed_encoding })
 }
