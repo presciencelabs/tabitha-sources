@@ -1,45 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types'
-import { PUBLIC_TARGETS_API_HOST } from '$env/static/public'
-
-const CATEGORY_NAME_LOOKUP = new Map([
-	['N', 'Noun'],
-	['V', 'Verb'],
-	['A', 'Adjective'],
-	['a', 'Adverb'],
-	['P', 'Adposition'],
-	['C', 'Conjunction'],
-	['p', 'Phrasal'],
-	['r', 'Particle'],
-	['n', 'Noun Phrase'],
-	['v', 'Verb Phrase'],
-	['j', 'Adjective Phrase'],
-	['d', 'Adverb Phrase'],
-	['c', 'Clause'],
-	['R', 'Paragraph'],
-	['E', 'Section'],
-	['.', 'period'],
-])
-
-const CATEGORY_ABBREVIATIONS = new Map([
-	['Noun', 'N'],
-	['Verb', 'V'],
-	['Adjective', 'Adj'],
-	['Adverb', 'Adv'],
-	['Adposition', 'Adp'],
-	['Conjunction', 'Con'],
-	['Phrasal', 'Phr'],
-	['Particle', 'Par'],
-	['Noun Phrase', 'NP'],
-	['Verb Phrase', 'VP'],
-	['Adjective Phrase', 'AdjP'],
-	['Adverb Phrase', 'AdvP'],
-	['Clause', 'C'],
-	['Paragraph', 'R'],
-	['Section', 'E'],
-	['period', 'period'],
-])
-
-const WORD_ENTITY_CATEGORIES = new Set(['Noun', 'Verb', 'Adjective', 'Adverb', 'Adposition', 'Conjunction', 'Phrasal', 'Particle'])
+import { CATEGORY_ABBREVIATIONS, CATEGORY_NAME_LOOKUP, WORD_ENTITY_CATEGORIES } from './lookups'
+import { load_source_features, load_target_features, transform_features } from './features'
 
 /**
  * The phase_2_encoding looks something like:
@@ -65,7 +26,7 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 	const EXTRACT_TYPE_FEATURES_VALUES = /~\\wd ~\\tg (?:([\w.])-([^~]*))?~\\lu ([^~]+)/g
 	const entities = [...semantic_encoding.matchAll(EXTRACT_TYPE_FEATURES_VALUES)]
 
-	const all_features = await load_features(db)
+	const all_features = await load_source_features(db)
 
 	return entities.map(decode_entity)
 
@@ -91,10 +52,11 @@ export async function transform_semantic_encoding(db: D1Database, semantic_encod
 }
 
 export async function transform_target_encoding(db: D1Database, semantic_encoding: string, project: string): Promise<TargetEntity[]> {
+	// In addition to the source encoding, '~\z1' denotes the target word
 	const EXTRACT_TYPE_FEATURES_VALUES = /~\\wd ~\\tg ([^~]+)?~\\lu ([^~]+)~\\z1 ?([^~]+)?/g
 	const entities = [...semantic_encoding.matchAll(EXTRACT_TYPE_FEATURES_VALUES)]
 
-	const all_features = await load_target_features(project) || await load_features(db)
+	const all_features = await load_target_features(project) || await load_source_features(db)
 
 	return entities.map(decode_entity)
 
@@ -121,81 +83,6 @@ export async function transform_target_encoding(db: D1Database, semantic_encodin
 			feature_codes,
 			features: features.map(({ value, name }) => ({ value, name: name || 'Unknown Lexical Feature' }))
 		}
-	}
-}
-
-async function load_features(db: D1Database): Promise<Map<string, DbFeature[]>> {
-	const sql = 'SELECT * FROM Features'
-	const { results } = await db.prepare(sql).all<DbFeature>()
-	return Map.groupBy(results, ({ category, position }) => `${category}:${position}`)
-}
-
-async function load_target_features(project: string): Promise<Map<string, DbFeature[]>|undefined> {
-	if (!project.length) {
-		return undefined
-	}
-	const response = await fetch(`${PUBLIC_TARGETS_API_HOST}/${project}/lookup/features`)
-	if (!response.ok) {
-		console.error(`Failed to load target features for project ${project}: ${response.status} ${response.statusText}`)
-		return undefined
-	}
-	const results = await response.json() as ApiFeatureResult
-
-	const categories = [...new Set(results.source.map(f => f.category))]
-	const max_source_positions_by_category = new Map(categories.map(c => [c, Math.max(0, ...results.source.filter(f => f.category === c).map(f => f.position))]))
-	const features = [
-		...results.source,
-		...results.lexical.map(f => ({ ...f, position: f.position + (max_source_positions_by_category.get(f.category) || 0) }))
-	]
-	return Map.groupBy(features, ({ category, position }) => `${category}:${position}`)
-}
-
-function transform_features(feature_codes: string, category: string, all_features: Map<string, DbFeature[]>): SourceFeatures {
-	if (!feature_codes.length) {
-		return { feature_codes, features: [] }
-	}
-
-	if (WORD_ENTITY_CATEGORIES.has(category)) {
-		// The first feature is the semantic complexity level, which is set during generation.
-		// It is therefore meaningless at this stage and can be dropped.
-
-		// The second feature is the lexical sense, which is treated specially elsewhere.
-		// So it too can be dropped from the features.
-
-		feature_codes = feature_codes.slice(2)
-	}
-
-	// The first feature on a Noun is the Noun List Index, and its value is just the character itself.
-	// This feature is not included in the 'Features' database, and so needs to be handled separately.
-	const is_noun = category === 'Noun'
-
-	const features = [...feature_codes].map((feature_code, index) => get_feature_value(category, is_noun ? index - 1 : index, feature_code, all_features))
-
-	if (is_noun) {
-		// at this point, entity_features[0] is an empty value
-		features[0] = { name: 'Noun List Index', value: feature_codes[0] }
-	}
-
-	return {
-		feature_codes,
-		features,
-	}
-}
-
-function get_feature_value(category: CategoryName, position: number, feature_code: string, all_features: Map<string, DbFeature[]>): EntityFeature {
-	// Add 1 to position because the position in the db is not zero-based like an index
-	const feature_key = `${category}:${position + 1}`
-	const db_features = all_features.get(feature_key)
-	if (!db_features) {
-		return {
-			name: `Unknown feature at ${position+1}`,
-			value: feature_code,
-		}
-	}
-	const result = db_features.find(({ code }) => code === feature_code)
-	return {
-		name: result?.feature ?? db_features[0].feature,
-		value: result?.value ?? feature_code,
 	}
 }
 

@@ -32,6 +32,7 @@ type DbFeature = {
 	code: string
 	feature: FeatureName
 	value: FeatureValue
+	example?: string
 }
 
 type EntityFeature = {
@@ -39,11 +40,13 @@ type EntityFeature = {
 	value: FeatureValue,
 }
 
-type ApiFeature = DbFeature
-type ApiFeatureResult = {
-	source: ApiFeature[]
-	lexical: ApiFeature[]
+type TargetApiFeature = DbFeature
+type TargetApiFeatureResult = {
+	source: TargetApiFeature[]
+	lexical: TargetApiFeature[]
 }
+
+type ApiFeature = DbFeature
 
 type OntologyResult = {
 	stem: string
