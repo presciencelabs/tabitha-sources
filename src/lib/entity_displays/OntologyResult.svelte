@@ -39,30 +39,10 @@
 	}
 </script>
 
-<HoverPopup>
-	{#snippet buttonContent()}
-		{#if data.sense === 'A'}
-			{data.stem}
-		{:else}
-			{data.stem}-{data.sense}
-		{/if}
-	{/snippet}
-	{#snippet dropdownContent()}
-		<div class="text-base-content">
-			{#await fetch_ontology_data(data)}
-				<span>Loading Ontology data...</span>
-			{:then ontology_data}
-				{@const {level, gloss} = ontology_data}
-				<p>
-					<span class="badge badge-outline L{level} badge-lg font-mono me-1">L{level}</span>
-					<span>{gloss}</span>
-				</p>
-				<p class="mt-1 text-xs">
-					<a class="link not-prose py-3" href={get_ontology_url_for_link(data)} target="_blank">
-						View in Ontology
-					</a>
-				</p>
-			{/await}
-		</div>
-	{/snippet}
-</HoverPopup>
+<span>
+	{#if data.sense === 'A'}
+		{data.stem}
+	{:else}
+		{data.stem}-{data.sense}
+	{/if}
+</span>

@@ -21,12 +21,5 @@
 
 <div class="inline-flex items-center pe-2">
 	<Punctuation source_entity={bracket_entity} classes={source_entity.value === '{' ? 'text-7xl' : ''} />
-	<HoverPopup>
-		{#snippet buttonContent()}
-			<span class="font-semibold -ms-1">{source_entity.category_abbr}{feature_code_display}</span>
-		{/snippet}
-		{#snippet dropdownContent()}
-			<Features {source_entity} />
-		{/snippet}
-	</HoverPopup>
+	<span class="font-semibold -ms-1">{source_entity.category_abbr}{feature_code_display}</span>
 </div>

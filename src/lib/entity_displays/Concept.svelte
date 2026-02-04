@@ -8,19 +8,12 @@
 </script>
 
 <div class="badge badge-lg rounded-full border-base-content badge-outline mx-1 py-5 text-md entity-{source_entity.category_abbr}">
-	<HoverPopup>
-		{#snippet buttonContent()}
-			<span class="pe-2 my-4">
-				{source_entity.category_abbr}
-				{#if source_entity.category === 'Noun'}
-					<sub class="-bottom-1.5 -left-1 italic">{source_entity.feature_codes[0]}</sub>
-				{/if}
-			</span>
-		{/snippet}
-		{#snippet dropdownContent()}
-			<Features {source_entity} classes="text-base-content" />
-		{/snippet}
-	</HoverPopup>
+	<span class="pe-2 my-4">
+		{source_entity.category_abbr}
+		{#if source_entity.category === 'Noun'}
+			<sub class="-bottom-1.5 -left-1 italic">{source_entity.feature_codes[0]}</sub>
+		{/if}
+	</span>
 
 	<div class="py-4">
 		{#if source_entity.pairing_concept === null}
