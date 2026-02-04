@@ -39,8 +39,9 @@
 		<tbody>
 			{#each all_senses as sense_data}
 				{@const { stem, sense, level, gloss} = sense_data}
+				{@const is_selected = data.sense === sense}
 				<tr>
-					<td>
+					<td class="{is_selected ? 'font-bold' : ''}">
 						<a class="link-hover not-prose py-3" href={get_ontology_url_for_link(data)} target="_blank">
 							{stem}-{sense}
 						</a>

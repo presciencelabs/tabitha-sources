@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte'
 	import SidebarDetail from './SidebarDetail.svelte'
-    import ConceptDetails from './ConceptDetails.svelte'
-    import AllSenseDetails from './AllSenseDetails.svelte'
-    import FeaturesDetails from './FeaturesDetails.svelte'
-    import SidebarEntityDisplay from './SidebarEntityDisplay.svelte'
-    import NounListDetails from './NounListDetails.svelte';
+	import ConceptDetails from './ConceptDetails.svelte'
+	import AllSenseDetails from './AllSenseDetails.svelte'
+	import FeaturesDetails from './FeaturesDetails.svelte'
+	import SidebarEntityDisplay from './SidebarEntityDisplay.svelte'
+	import NounListDetails from './NounListDetails.svelte'
 
 	export let selected_entity: PageSourceEntity|null
 	export let is_open: boolean
@@ -14,13 +14,12 @@
 </script>
 
 <div
-	class="fixed top-0 right-0 h-full w-90 bg-base-100 border-l border-base-300 shadow-xl transform transition-transform duration-300 flex flex-col"
+	class="fixed top-0 right-0 h-full w-100 bg-base-100 border-l border-base-300 shadow-xl transform transition-transform duration-300 flex flex-col"
 	style="transform: translateX({is_open ? '0' : '100%'})"
 	>
 	<button class="btn btn-circle btn-ghost btn-sm absolute right-3 top-5" on:click={close_sidebar} >
 		<Icon icon="material-symbols:close" class="h-4 w-4" />
 	</button>
-
 
 	{#if selected_entity}
 		<div class="p-4 flex-1 overflow-auto">
@@ -71,7 +70,7 @@
 
 				<!--Features-->
 				{#if selected_entity.features.length > 0}
-					<SidebarDetail summary_title="Features">
+					<SidebarDetail summary_title="Features" start_open={true}>
 						{#snippet detailsContent()}
 							<FeaturesDetails data={selected_entity} />
 						{/snippet}

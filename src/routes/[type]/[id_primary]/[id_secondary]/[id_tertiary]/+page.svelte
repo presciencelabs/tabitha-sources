@@ -1,5 +1,6 @@
 <script>
 	import { SourceEntities } from '$lib'
+	import Settings from '$lib/Settings.svelte'
 	import Sidebar from '$lib/sidebar/Sidebar.svelte'
 
 	/** @type {PageData} */
@@ -37,6 +38,8 @@
 		sidebar_open = false
 	}
 </script>
+
+<Settings />
 
 <div class="flex justify-center max-w-full pb-5 join">
 	{#if nav_data.previous}
