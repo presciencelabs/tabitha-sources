@@ -27,7 +27,7 @@
 		</div>
 	{:else if is_boundary_end(selected_entity)}
 		<div class="inline-flex">
-			<Punctuation source_entity={{ ...selected_entity, value: '[' }} classes={selected_entity.value === '}' ? 'text-7xl' : ''} />
+			<Punctuation source_entity={{ ...selected_entity, value: ']' }} classes={selected_entity.value === '}' ? 'text-7xl' : ''} />
 		</div>
 	{:else if selected_entity.concept !== null}
 		<div class="badge badge-lg rounded-full border-base-content badge-outline mx-1 py-5 text-md entity-{selected_entity.category_abbr}">
