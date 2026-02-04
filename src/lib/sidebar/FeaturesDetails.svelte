@@ -2,7 +2,7 @@
 	/** @type {PageSourceEntity} */
 	export let data
 
-	const filtered_features = data.features.filter(({ name }) => !name.includes('Spare'))
+	$: filtered_features = data.features.filter(({ name }) => !name.includes('Spare'))
 </script>
 
 {#if filtered_features.length === 0}
