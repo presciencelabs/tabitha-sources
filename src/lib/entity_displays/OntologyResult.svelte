@@ -1,22 +1,20 @@
 <script>
 	import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
+	import { onMount } from 'svelte'
 	import HoverPopup from './HoverPopup.svelte'
 
 	/** @type {SourceConcept} */
 	export let data
 
-	/**
-	 * @param {SourceConcept} concept
-	 * @returns {Promise<OntologyResult>}
-	 */
-	async function fetch_ontology_data(concept) {
-		const { stem, sense, part_of_speech } = concept
+	onMount(async () => {
+		const { stem, sense, part_of_speech } = data
 		const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=${stem}-${sense}&category=${part_of_speech}`)
 
 		const DEFAULT_DATA = {
-			...concept,
+			...data,
 			level: '',
 			gloss: '',
+			categories: [],
 		}
 
 		if (!response.ok) {
@@ -27,8 +25,9 @@
 		const results = await response.json()
 		
 		// Use the result that exactly matches the original stem (eg. "lot" vs "Lot")
-		return results.find(result => result.stem === stem) ?? DEFAULT_DATA
-	}
+		const result = results.find(result => result.stem === stem) ?? DEFAULT_DATA
+		data.ontology_data = result
+	})
 
 	/**
 	 * @param {SourceConcept} concept
@@ -49,10 +48,8 @@
 	{/snippet}
 	{#snippet dropdownContent()}
 		<div class="text-base-content">
-			{#await fetch_ontology_data(data)}
-				<span>Loading Ontology data...</span>
-			{:then ontology_data}
-				{@const {level, gloss} = ontology_data}
+			{#if data.ontology_data}
+				{@const {level, gloss} = data.ontology_data}
 				<p>
 					<span class="badge badge-outline L{level} badge-lg font-mono me-1">L{level}</span>
 					<span>{gloss}</span>
@@ -62,7 +59,9 @@
 						View in Ontology
 					</a>
 				</p>
-			{/await}
+			{:else}
+				<span>Loading Ontology data...</span>
+			{/if}
 		</div>
 	{/snippet}
 </HoverPopup>

@@ -6,42 +6,31 @@
 
 	/**
 	 * @param {SourceConcept} concept
-	 * @returns {Promise<OntologyResult>}
-	 */
-	async function fetch_ontology_data(concept) {
-		const { stem, sense, part_of_speech } = concept
-		const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=${stem}-${sense}&category=${part_of_speech}`)
-
-		const DEFAULT_DATA = {
-			...concept,
-			level: '',
-			gloss: '',
-		}
-
-		if (!response.ok) {
-			return DEFAULT_DATA
-		}
-
-		/** @type {OntologyResult[]} */
-		const results = await response.json()
-		
-		// Use the result that exactly matches the original stem (eg. "lot" vs "Lot")
-		return results.find(result => result.stem === stem) ?? DEFAULT_DATA
-	}
-
-	/**
-	 * @param {SourceConcept} concept
 	 * @returns {string} fully-qualified URL to the ontology API
 	 */
 	function get_ontology_url_for_link({ stem, part_of_speech }) {
 		return `${PUBLIC_ONTOLOGY_API_HOST}/?q=${stem}&category=${part_of_speech}`
 	}
+
+	/**
+	 * @param {SourceConcept} concept
+	 * @returns {[string, string[]]}
+	 */
+	function get_category_and_usage(concept) {
+		const categories = concept.ontology_data?.categories || []
+		if (concept.part_of_speech === 'Noun') {
+			return [categories[0], []]
+		} else if (concept.part_of_speech === 'Adjective') {
+			return [categories[0], categories.slice(1)]
+		} else {
+			return ['', categories]
+		}
+	}
 </script>
 
-{#await fetch_ontology_data(data)}
-	<span>Loading Ontology data...</span>
-{:then ontology_data}
-	{@const {stem, sense, level, gloss} = ontology_data}
+{#if data.ontology_data}
+	{@const {stem, sense, level, gloss } = data.ontology_data}
+	{@const [category, usages] = get_category_and_usage(data)}
 	<table class="table table-sm table-zebra">
 		<tbody>
 			<tr>
@@ -50,7 +39,6 @@
 					<a class="link-hover not-prose py-3" href={get_ontology_url_for_link(data)} target="_blank">
 						{stem}-{sense}
 					</a>
-					<!--TODO include the brief gloss-->
 				</td>
 			</tr>
 			<tr>
@@ -61,10 +49,26 @@
 				<th>Level</th>
 				<td><span class="badge badge-outline L{level} badge-sm font-mono me-1">L{level}</span></td>
 			</tr>
-			<tr>
-				<th>Occurrences</th>
-				<td><!--TODO--><em>Coming soon...</em></td>
-			</tr>
+			{#if category.length}
+				<tr>
+					<th>Category</th>
+					<td>{category}</td>
+				</tr>
+			{/if}
+			{#if usages.length}
+				<tr>
+					<th>Usage</th>
+					<td>
+						<ul>
+							{#each usages.filter(cat => !cat.startsWith('never')) as usage}
+								<li>{usage}</li>
+							{/each}
+						</ul>
+					</td>
+				</tr>
+			{/if}
 		</tbody>
 	</table>
-{/await}
+{:else}
+	<span>Loading Ontology data...</span>
+{/if}

@@ -19,6 +19,7 @@ type SourceConcept = {
 	stem: string
 	sense: string
 	part_of_speech: string
+	ontology_data?: OntologyResult
 }
 
 type EntityFilter = (entity: SourceEntity) => boolean
@@ -46,7 +47,5 @@ type OntologyResult = {
 	part_of_speech: string
 	level: string
 	gloss: string
-	// TODO include more info?
-	// brief_gloss: string
-	// categorization: string[]
+	categories: string[]
 }
