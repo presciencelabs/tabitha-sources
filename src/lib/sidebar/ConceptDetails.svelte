@@ -19,9 +19,9 @@
 	function get_category_and_usage(concept) {
 		const categories = concept.ontology_data?.categories || []
 		if (concept.part_of_speech === 'Noun') {
-			return [categories[0], []]
+			return [categories.at(0) ?? '', []]
 		} else if (concept.part_of_speech === 'Adjective') {
-			return [categories[0], categories.slice(1)]
+			return [categories.at(0) ?? '', categories.slice(1)]
 		} else {
 			return ['', categories]
 		}
