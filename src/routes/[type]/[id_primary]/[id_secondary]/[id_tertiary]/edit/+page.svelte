@@ -91,7 +91,7 @@
 <div class="flex flex-row flex-wrap max-w-full">
 	<Navigation nav_data={data.nav_data} url_end="/edit" />
 
-	<button onclick={ check_text } onchange={ text_changed } class="btn btn-primary ml-8" type="submit" disabled={checking}>
+	<button onclick={ check_text } onchange={ text_changed } class="btn btn-primary ml-8 btn-disabled" type="submit">
 		Check
 		{#if checking}
 			<Icon icon="line-md:loading-twotone-loop" class="h-6 w-6" />
@@ -102,7 +102,7 @@
 		{/if}
 	</button>
 
-	<button onclick={ analyze_text } class="btn btn-secondary ml-4" type="submit" disabled={analyzing}>
+	<button onclick={ analyze_text } class="btn btn-secondary ml-4 btn-disabled" type="submit">
 		Analyze
 		<Icon icon="mdi:magnify" class="h-6 w-6" />
 	</button>
