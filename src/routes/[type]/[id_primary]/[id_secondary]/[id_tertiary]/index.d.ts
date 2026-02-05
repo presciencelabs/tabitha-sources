@@ -16,6 +16,7 @@ type ApiSource = Source & {
 
 type NavData = {
 	previous: Reference | null
+	current: Reference
 	next: Reference | null
 }
 

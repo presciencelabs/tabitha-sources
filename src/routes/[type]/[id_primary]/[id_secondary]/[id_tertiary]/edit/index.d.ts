@@ -76,5 +76,3 @@ type AnalyzerApiSourceEntity = {
 	pairing_concept: SourceConcept|null
 	pairing_type: PairingType
 }
-
-
