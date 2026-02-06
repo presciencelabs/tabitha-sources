@@ -136,7 +136,7 @@ function feature_structure_to_codes(category: CategoryName, features: EntityFeat
 	return codes.join('')
 }
 
-export async function transform_features_to_codes(db: D1Database, source_entities: SourceEntity[]) {
+export async function transform_features_to_codes(db: D1Database, source_entities: SourceEntity[]): Promise<SourceEntity[]> {
 	const all_features = await load_feature_map(db)
 
 	return source_entities.map(entity => {

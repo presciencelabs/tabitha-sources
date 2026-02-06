@@ -12,14 +12,21 @@ export async function GET({ locals: { db }, url: { searchParams } }) {
 	/** @type {AnalyzerApiResponse} */
 	const api_result = await response.json()
 
+	// console.log(api_result.source_entities.map(e => `${e.category} ${e.value} ${e.features.map(f => f.name + '=' + f.value).join('|')}`))
+
 	const source_entities = api_result.source_entities.map(transform_api_entity)
 	const source_entities_with_features = await transform_features_to_codes(db, source_entities)
 	const structured_entities = structure_semantic_encoding(source_entities_with_features)
 
-	return json({
+	// console.log()
+	// console.log(source_entities_with_features.map(e => `${e.category} ${e.value} ${e.features.map(f => f.name + '=' + f.value).join('|')}`))
+
+	/** @type {AnalysisResult} */
+	const result = {
 		source_entities: structured_entities,
 		noun_list: api_result.noun_list,
-	})
+	}
+	return json(result)
 }
 
 /**
