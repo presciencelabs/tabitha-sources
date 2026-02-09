@@ -1,5 +1,6 @@
 <script>
 	import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
+	import Icon from '@iconify/svelte'
 
 	/** @type {SourceConcept} */
 	export let data
@@ -31,15 +32,19 @@
 {#if data.ontology_data}
 	{@const {stem, sense, level, gloss } = data.ontology_data}
 	{@const [category, usages] = get_category_and_usage(data)}
+
+	<div class="flex justify-end">
+		<a class="link link-accent text-xs flex items-end" href={get_ontology_url_for_link(data)} target="_blank">
+			View in Ontology
+			<Icon icon="fe:link-external" class="h-4 w-4" />
+		</a>
+	</div>
+
 	<table class="table table-sm table-zebra">
 		<tbody>
 			<tr>
 				<th>Sense</th>
-				<td>
-					<a class="link-hover not-prose py-3" href={get_ontology_url_for_link(data)} target="_blank">
-						{stem}-{sense}
-					</a>
-				</td>
+				<td>{stem}-{sense}</td>
 			</tr>
 			<tr>
 				<th>Gloss</th>

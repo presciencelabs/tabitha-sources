@@ -10,24 +10,16 @@
 	function is_boundary_start({ value }) {
 		return ['{', '[', '('].includes(value)
 	}
-
-	/**
-	 * @param {PageSourceEntity} entity
-	 */
-	function is_boundary_end({ value }) {
-		return ['}', ']', ')'].includes(value)
-	}
 </script>
 
 <div class="entity-{selected_entity.boundary_category}">
 	{#if is_boundary_start(selected_entity)}
+		{@const is_main_clause = selected_entity.value === '{'}
 		<div class="inline-flex items-center pe-2">
-			<Punctuation source_entity={{ ...selected_entity, value: '[' }} classes={selected_entity.value === '{' ? 'text-7xl' : ''} />
+			<Punctuation source_entity={{ ...selected_entity, value: '[' }} classes={is_main_clause ? 'text-7xl' : ''} />
 			<span class="font-semibold -ms-1">{selected_entity.category_abbr}</span>
-		</div>
-	{:else if is_boundary_end(selected_entity)}
-		<div class="inline-flex">
-			<Punctuation source_entity={{ ...selected_entity, value: ']' }} classes={selected_entity.value === '}' ? 'text-7xl' : ''} />
+			<span class="mx-2 tracking-widest">...</span>
+			<Punctuation source_entity={{ ...selected_entity, value: ']' }} classes={is_main_clause ? 'text-7xl' : ''} />
 		</div>
 	{:else if selected_entity.concept !== null}
 		<div class="badge badge-lg rounded-full border-base-content badge-outline mx-1 py-5 text-md entity-{selected_entity.category_abbr}">

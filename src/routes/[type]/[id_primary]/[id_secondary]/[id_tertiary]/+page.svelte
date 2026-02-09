@@ -28,14 +28,14 @@
 <div class="flex items-center max-w-full pb-5">
 	<Settings />
 	<div class="mx-auto">
-		<Navigation nav_data={data.nav_data} />
+		<Navigation {nav_data} />
 	</div>
 	<div></div>
 </div>
 
 {#if source.parsed_semantic_encoding.length > 0}
 	<div class="flex h-screen">
-		<div class="transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '20rem' : '0'};">
+		<div class="transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '24rem' : '0'};">
 			<SourceEntities source_entities={source.parsed_semantic_encoding} on_select_entity={handle_select_entity} />
 		</div>
 		{#if sidebar_open}
