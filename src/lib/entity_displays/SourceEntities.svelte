@@ -77,7 +77,14 @@
 	 * @param {number} i
 	 */
 	function entity_focus(i) {
-		on_select_entity(source_entities[i])
+		const entity = source_entities[i]
+		if (is_boundary_end(entity)) {
+			// focus on the boundary start instead
+			on_select_entity(source_entities[entity.parent_id])
+		} else {
+			on_select_entity(entity)
+		}
+		
 	}
 
 	/**

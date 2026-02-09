@@ -27,6 +27,7 @@ export async function load({ locals: { db }, params: { type, id_primary, id_seco
 		},
 		nav_data: {
 			previous,
+			current: reference,
 			next,
 		},
 	}
