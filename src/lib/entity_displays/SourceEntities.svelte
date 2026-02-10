@@ -7,6 +7,9 @@
 	/** @type {PageSourceEntity[]} */
 	export let source_entities
 
+	/** @type {PageSourceEntity|null} */
+	export let selected_entity
+
 	/** @type {(entity: PageSourceEntity) => void}*/
 	export let on_select_entity
 
@@ -84,7 +87,6 @@
 		} else {
 			on_select_entity(entity)
 		}
-		
 	}
 
 	/**
@@ -112,15 +114,16 @@
 
 {#each main_clauses as main_clause}
 	<div class="inline-flex flex-wrap py-3">
-		{#each main_clause as source_entity}
-			{@const i = source_entity.id}
-			{@const component = component_filters.find(([filter]) => filter(source_entity))?.[1]}
-			<div bind:this={entity_divs[i]} role="button" tabindex="0" class="content-center h-20 entity-{source_entity.boundary_category}"
-					on:mouseover={() => entity_mouseover(i)}
+		{#each main_clause as entity}
+			{@const i = entity.id}
+			{@const component = component_filters.find(([filter]) => filter(entity))?.[1]}
+			{@const selected = selected_entity?.id === entity.id || (is_boundary_end(entity) && selected_entity?.id === source_entities[entity.parent_id]?.id)}
+			<div bind:this={entity_divs[i]} role="button" tabindex="0" class="content-center h-20 {selected ? 'bg-neutral-content' : ''}"
+					on:mouseenter={() => entity_mouseover(i)}
 					on:focus={() => entity_focus(i)}
-					on:mouseout={clear_highlight}
+					on:mouseleave={clear_highlight}
 					on:blur={() => {}} >
-				<svelte:component this={component} {source_entity} />
+				<svelte:component this={component} source_entity={entity} />
 			</div>
 		{/each}
 	</div>
