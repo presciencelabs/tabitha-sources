@@ -36,7 +36,7 @@
 {#if source.parsed_semantic_encoding.length > 0}
 	<div class="flex h-screen">
 		<div class="transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '24rem' : '0'};">
-			<SourceEntities source_entities={source.parsed_semantic_encoding} on_select_entity={handle_select_entity} />
+			<SourceEntities source_entities={source.parsed_semantic_encoding} {selected_entity} on_select_entity={handle_select_entity} />
 		</div>
 		{#if sidebar_open}
 			<Sidebar {selected_entity} is_open={sidebar_open} {close_sidebar} noun_list={source.noun_list} />

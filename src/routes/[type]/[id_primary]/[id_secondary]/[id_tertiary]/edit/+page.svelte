@@ -2,8 +2,8 @@
 	import { PUBLIC_EDITOR_API_HOST } from '$env/static/public'
 	import { Navigation, SourceEntities } from '$lib'
 	import type { PageProps } from './$types'
-    import Settings from '$lib/Settings.svelte'
-    import Sidebar from '$lib/sidebar/Sidebar.svelte'
+	import Settings from '$lib/Settings.svelte'
+	import Sidebar from '$lib/sidebar/Sidebar.svelte'
 	import Icon from '@iconify/svelte'
 
 	let { data }: PageProps = $props()
@@ -29,7 +29,6 @@
 		const response = await fetch(`${PUBLIC_EDITOR_API_HOST}/check?text=${sanitize_input(phase1_text)}`)
 
 		const check_response: CheckerResult = await response.json()
-		// console.log(check_response)
 		check_response.tokens = check_response.tokens.flatMap(flatten_tokens)
 
 		errors_and_warnings = check_response.tokens
@@ -159,7 +158,7 @@
 	<div class="divider my-2"></div>
 	<div class="flex h-screen">
 		<div class="transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '24rem' : '0'};">
-			<SourceEntities {source_entities} on_select_entity={handle_select_entity} />
+			<SourceEntities {source_entities} {selected_entity} on_select_entity={handle_select_entity} />
 		</div>
 		{#if sidebar_open}
 			<Sidebar {selected_entity} is_open={sidebar_open} {close_sidebar} {noun_list} enable_edit={true} />

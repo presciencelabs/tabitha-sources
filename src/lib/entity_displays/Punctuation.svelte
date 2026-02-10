@@ -1,5 +1,5 @@
 <script>
-	/** @type {SourceEntity} */
+	/** @type {PageSourceEntity} */
 	export let source_entity
 
 	export let classes = ''

@@ -3,7 +3,7 @@
 	import HoverPopup from './HoverPopup.svelte'
 	import Punctuation from './Punctuation.svelte'
 
-	/** @type {SourceEntity} */
+	/** @type {PageSourceEntity} */
 	export let source_entity
 
 	const feature_codes_to_display = get_feature_codes_to_display()
@@ -19,7 +19,7 @@
 	const bracket_entity = { ...source_entity, value: '[' }
 </script>
 
-<div class="inline-flex items-center pe-2">
+<div class="inline-flex items-center pe-2 entity-{source_entity.boundary_category}">
 	<Punctuation source_entity={bracket_entity} classes={source_entity.value === '{' ? 'text-7xl' : ''} />
 	<HoverPopup>
 		{#snippet buttonContent()}

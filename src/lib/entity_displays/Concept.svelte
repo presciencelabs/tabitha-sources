@@ -3,7 +3,7 @@
 	import HoverPopup from './HoverPopup.svelte'
 	import OntologyResult from './OntologyResult.svelte'
 
-	export let source_entity: SourceEntity
+	export let source_entity: PageSourceEntity
 	const concept = source_entity.concept!	// will always be non-null at this point
 </script>
 
