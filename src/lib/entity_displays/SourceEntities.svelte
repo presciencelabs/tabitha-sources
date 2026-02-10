@@ -3,6 +3,7 @@
 	import BoundaryEnd from './BoundaryEnd.svelte'
 	import BoundaryStart from './BoundaryStart.svelte'
 	import Punctuation from './Punctuation.svelte'
+	import { is_boundary_end, is_boundary_start } from '$lib/encoding/entity_filters'
 
 	/** @type {PageSourceEntity[]} */
 	export let source_entities
@@ -32,20 +33,6 @@
 		}
 		clauses.at(-1)?.push(source_entity)
 		return clauses
-	}
-
-	/**
-	 * @param {PageSourceEntity} entity
-	 */
-	function is_boundary_start({ value }) {
-		return ['{', '[', '('].includes(value)
-	}
-
-	/**
-	 * @param {PageSourceEntity} entity
-	 */
-	function is_boundary_end({ value }) {
-		return ['}', ']', ')'].includes(value)
 	}
 
 	/** @type {[(entity: PageSourceEntity) => boolean, typeof Concept][]}*/

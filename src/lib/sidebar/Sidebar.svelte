@@ -35,12 +35,12 @@
 				{#if selected_entity.concept !== null}
 					<SidebarDetail summary_title="Concept Details">
 						{#snippet detailsContent()}
-							<ConceptDetails data={selected_entity.concept!!} />
+							<ConceptDetails data={selected_entity.concept!} />
 						{/snippet}
 					</SidebarDetail>
 					<SidebarDetail summary_title="All Senses">
 						{#snippet detailsContent()}
-							<AllSenseDetails data={selected_entity.concept!!} />
+							<AllSenseDetails data={selected_entity.concept!} />
 						{/snippet}
 					</SidebarDetail>
 				{/if}
@@ -49,12 +49,12 @@
 				{#if selected_entity.pairing_concept !== null}
 					<SidebarDetail summary_title="Concept Details - Pairing">
 						{#snippet detailsContent()}
-							<ConceptDetails data={selected_entity.pairing_concept!!} />
+							<ConceptDetails data={selected_entity.pairing_concept!} />
 						{/snippet}
 					</SidebarDetail>
 					<SidebarDetail summary_title="All Senses - Pairing">
 						{#snippet detailsContent()}
-							<AllSenseDetails data={selected_entity.pairing_concept!!} />
+							<AllSenseDetails data={selected_entity.pairing_concept!} />
 						{/snippet}
 					</SidebarDetail>
 				{/if}

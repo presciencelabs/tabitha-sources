@@ -1,4 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types'
+import { is_boundary_end, is_boundary_start } from './entity_filters'
 
 const CATEGORY_NAME_LOOKUP = new Map([
 	['N', 'Noun'],
@@ -177,7 +178,7 @@ function get_concept_data(value: string, category: string, feature_codes: string
 }
 
 export function structure_semantic_encoding(entities: SourceEntity[]): PageSourceEntity[] {
-	const new_entities: PageSourceEntity[] = entities.map((entity, i) => ({ ...entity, id: i, parent_id: -1, boundary_category: ''}))
+	const new_entities: PageSourceEntity[] = entities.map((entity, i) => ({ ...entity, id: i, parent_id: -1, boundary_category: '' }))
 
 	const parent_id_stack: number[] = []
 	for (const [i, entity] of new_entities.entries()) {
@@ -206,12 +207,4 @@ export function get_noun_list(source: Source): NounListEntry[] {
 			noun: `${entry.slice(1)}-${entry[0]}`,	// the sense is always the first letter
 			index: index < 9 ? `${index + 1}` : String.fromCharCode('A'.charCodeAt(0) + (index - 9)),
 		}))
-}
-
-function is_boundary_start(entity: SourceEntity) {
-	return ['{', '[', '('].includes(entity.value)
-}
-
-function is_boundary_end(entity: SourceEntity) {
-	return ['}', ']', ')'].includes(entity.value)
 }

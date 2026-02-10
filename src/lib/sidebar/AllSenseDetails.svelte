@@ -46,7 +46,7 @@
 	<table class="table table-sm table-zebra">
 		<tbody>
 			{#each all_senses as sense_data}
-				{@const { stem, sense, level, gloss} = sense_data}
+				{@const { stem, sense, level, gloss } = sense_data}
 				{@const is_selected = data.sense === sense}
 				<tr>
 					<td class="{is_selected ? 'font-bold' : ''}">

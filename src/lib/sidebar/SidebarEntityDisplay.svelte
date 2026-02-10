@@ -1,15 +1,9 @@
 <script>
+	import { is_boundary_start } from '$lib/encoding/entity_filters'
 	import Punctuation from '../entity_displays/Punctuation.svelte'
 
 	/** @type {PageSourceEntity} */
 	export let selected_entity
-
-	/**
-	 * @param {PageSourceEntity} entity
-	 */
-	function is_boundary_start({ value }) {
-		return ['{', '[', '('].includes(value)
-	}
 </script>
 
 <div class="entity-{selected_entity.boundary_category}">
