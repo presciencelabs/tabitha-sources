@@ -162,7 +162,7 @@
 			<SourceEntities {source_entities} on_select_entity={handle_select_entity} />
 		</div>
 		{#if sidebar_open}
-			<Sidebar {selected_entity} is_open={sidebar_open} {close_sidebar} {noun_list} />
+			<Sidebar {selected_entity} is_open={sidebar_open} {close_sidebar} {noun_list} enable_edit={true} />
 		{/if}
 	</div>
 {/if}

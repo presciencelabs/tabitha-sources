@@ -7,17 +7,21 @@
 	import SidebarEntityDisplay from './SidebarEntityDisplay.svelte'
 	import NounListDetails from './NounListDetails.svelte'
 
-	export let selected_entity: PageSourceEntity|null
-	export let is_open: boolean
-	export let close_sidebar: () => void
-	export let noun_list: NounListEntry[]
+	interface Props {
+		selected_entity: PageSourceEntity|null
+		is_open: boolean
+		enable_edit?: boolean
+		close_sidebar: () => void
+		noun_list: NounListEntry[]
+	}
+	let { selected_entity, is_open, close_sidebar, noun_list, enable_edit=false }: Props = $props()
 </script>
 
 <div
 	class="fixed top-0 right-0 h-full w-100 bg-base-100 border-l border-base-300 shadow-xl transform transition-transform duration-300 flex flex-col"
 	style="transform: translateX({is_open ? '0' : '100%'})"
 	>
-	<button class="btn btn-circle btn-ghost btn-sm absolute right-3 top-5" on:click={close_sidebar} >
+	<button class="btn btn-circle btn-ghost btn-sm absolute right-3 top-5" onclick={close_sidebar} >
 		<Icon icon="material-symbols:close" class="h-4 w-4" />
 	</button>
 
@@ -63,7 +67,7 @@
 				{#if selected_entity.category === 'Noun'}
 					<SidebarDetail summary_title="Noun List Index">
 						{#snippet detailsContent()}
-							<NounListDetails data={selected_entity} noun_list={noun_list} />
+							<NounListDetails data={selected_entity} {noun_list} can_edit={enable_edit} />
 						{/snippet}
 					</SidebarDetail>
 				{/if}
