@@ -17,6 +17,23 @@
 	/** @type {HTMLElement[]} */
 	let entity_divs = []
 
+	/** @type {[number, number]|null} */
+	$: hover_range = null
+	$: select_range = !selected_entity ? null
+		: is_boundary_start(selected_entity)
+			? get_boundary_range(selected_entity.id)
+			: [selected_entity.id, selected_entity.id]
+
+	$: entity_highlights = source_entities.map((_, i) => {
+		if (hover_range && i >= hover_range[0] && i <= hover_range[1]) {
+			return 'bg-base-300'
+		}
+		if (select_range && i >= select_range[0] && i <= select_range[1]) {
+			return 'bg-neutral-content'
+		}
+		return ''
+	})
+
 	const main_clauses = source_entities.reduce(clause_reducer, [])
 
 	/**
@@ -47,20 +64,11 @@
 	 * @param {number} i
 	 */
 	function entity_mouseover(i) {
-		const [start, end_inclusive] = get_parent_range(i)
-		add_highlight(start, end_inclusive)
+		hover_range = get_boundary_range(i)
 	}
 
-	/**
-	 * @param {number} start
-	 * @param {number} end_inclusive
-	*/
-	function add_highlight(start, end_inclusive) {
-		entity_divs.slice(start, end_inclusive+1).forEach(elem => elem.classList.add('bg-base-300'))
-	}
-
-	function clear_highlight() {
-		entity_divs.forEach(div => div.classList.remove('bg-base-300'))
+	function entity_mouseout() {
+		hover_range = null
 	}
 
 	/**
@@ -80,7 +88,7 @@
 	 * @param {number} i
 	 * @returns {[number, number]}
 	 */
-	function get_parent_range(i) {
+	function get_boundary_range(i) {
 		const entity = source_entities[i]
 		if (is_boundary_start(entity)) {
 			const last_id = source_entities.findLastIndex(e => e.parent_id === i)
@@ -104,11 +112,10 @@
 		{#each main_clause as entity}
 			{@const i = entity.id}
 			{@const component = component_filters.find(([filter]) => filter(entity))?.[1]}
-			{@const selected = selected_entity?.id === entity.id || (is_boundary_end(entity) && selected_entity?.id === source_entities[entity.parent_id]?.id)}
-			<div bind:this={entity_divs[i]} role="button" tabindex="0" class="content-center h-20 {selected ? 'bg-neutral-content' : ''}"
+			<div bind:this={entity_divs[i]} role="button" tabindex="0" class="content-center h-20 {entity_highlights[i]}"
 					on:mouseenter={() => entity_mouseover(i)}
 					on:focus={() => entity_focus(i)}
-					on:mouseleave={clear_highlight}
+					on:mouseleave={entity_mouseout}
 					on:blur={() => {}} >
 				<svelte:component this={component} source_entity={entity} />
 			</div>
