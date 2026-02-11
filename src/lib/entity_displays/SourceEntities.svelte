@@ -12,7 +12,7 @@
 	export let selected_entity
 
 	/** @type {(entity: PageSourceEntity) => void}*/
-	export let on_select_entity
+	export let handle_entity_selected
 
 	/** @type {HTMLElement[]} */
 	let entity_divs = []
@@ -77,10 +77,10 @@
 	function entity_focus(i) {
 		const entity = source_entities[i]
 		if (is_boundary_end(entity)) {
-			// focus on the boundary start instead
-			on_select_entity(source_entities[entity.parent_id])
+			// select the boundary start instead
+			handle_entity_selected(source_entities[entity.parent_id])
 		} else {
-			on_select_entity(entity)
+			handle_entity_selected(entity)
 		}
 	}
 

@@ -1,6 +1,6 @@
 <script>
 	import { is_boundary_start } from '$lib/encoding/entity_filters'
-	import Punctuation from '../entity_displays/Punctuation.svelte'
+	import Punctuation from '$lib/entity_displays/Punctuation.svelte'
 
 	/** @type {PageSourceEntity} */
 	export let selected_entity

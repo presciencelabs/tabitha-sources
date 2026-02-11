@@ -22,10 +22,10 @@
 <div class="inline-flex items-center pe-2 entity-{source_entity.boundary_category}">
 	<Punctuation source_entity={bracket_entity} classes={source_entity.value === '{' ? 'text-7xl' : ''} />
 	<HoverPopup>
-		{#snippet buttonContent()}
+		{#snippet button_content()}
 			<span class="font-semibold -ms-1">{source_entity.category_abbr}{feature_code_display}</span>
 		{/snippet}
-		{#snippet dropdownContent()}
+		{#snippet dropdown_content()}
 			<Features {source_entity} />
 		{/snippet}
 	</HoverPopup>
