@@ -1,15 +1,9 @@
 <script>
-	import Punctuation from '../entity_displays/Punctuation.svelte'
+	import { is_boundary_start } from '$lib/encoding/entity_filters'
+	import Punctuation from '$lib/entity_displays/Punctuation.svelte'
 
 	/** @type {PageSourceEntity} */
 	export let selected_entity
-
-	/**
-	 * @param {PageSourceEntity} entity
-	 */
-	function is_boundary_start({ value }) {
-		return ['{', '[', '('].includes(value)
-	}
 </script>
 
 <div class="entity-{selected_entity.boundary_category}">
@@ -25,8 +19,8 @@
 		<div class="badge badge-lg rounded-full border-base-content badge-outline mx-1 py-5 text-md entity-{selected_entity.category_abbr}">
 			<span class="pe-2 py-4">
 				{selected_entity.category_abbr}
-				{#if selected_entity.noun_list_index}
-					<sub class="-bottom-1.5 -left-1 italic">{selected_entity.noun_list_index}</sub>
+				{#if selected_entity.category === 'Noun'}
+					<sub class="-bottom-1.5 -left-1 italic">{selected_entity.feature_codes[0]}</sub>
 				{/if}
 			</span>
 

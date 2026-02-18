@@ -9,15 +9,15 @@
 
 <div class="badge badge-lg rounded-full border-base-content badge-outline mx-1 py-5 text-md entity-{source_entity.category_abbr}">
 	<HoverPopup>
-		{#snippet buttonContent()}
+		{#snippet button_content()}
 			<span class="pe-2 my-4">
 				{source_entity.category_abbr}
-				{#if source_entity.noun_list_index}
-					<sub class="-bottom-1.5 -left-1 italic">{source_entity.noun_list_index}</sub>
+				{#if source_entity.category === 'Noun'}
+					<sub class="-bottom-1.5 -left-1 italic">{source_entity.feature_codes[0]}</sub>
 				{/if}
 			</span>
 		{/snippet}
-		{#snippet dropdownContent()}
+		{#snippet dropdown_content()}
 			<Features {source_entity} classes="text-base-content" />
 		{/snippet}
 	</HoverPopup>

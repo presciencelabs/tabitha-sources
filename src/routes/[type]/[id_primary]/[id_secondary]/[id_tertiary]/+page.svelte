@@ -14,7 +14,7 @@
 	/**
 	 * @param {PageSourceEntity} entity
 	 */
-	function handle_select_entity(entity) {
+	function handle_entity_selected(entity) {
 		selected_entity = entity
 		sidebar_open = true
 	}
@@ -25,18 +25,19 @@
 	}
 </script>
 
-<div class="flex items-center max-w-full pb-5">
-	<Settings />
-	<div class="mx-auto">
+<div class="grid justify-items-stretch grid-cols-3 pb-5">
+	<div class="justify-self-start">
+		<Settings />
+	</div>
+	<div class="justify-self-center">
 		<Navigation {nav_data} />
 	</div>
-	<div></div>
 </div>
 
 {#if source.parsed_semantic_encoding.length > 0}
 	<div class="flex h-screen">
 		<div class="transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '24rem' : '0'};">
-			<SourceEntities source_entities={source.parsed_semantic_encoding} {selected_entity} on_select_entity={handle_select_entity} />
+			<SourceEntities source_entities={source.parsed_semantic_encoding} {selected_entity} {handle_entity_selected} />
 		</div>
 		{#if sidebar_open}
 			<Sidebar {selected_entity} is_open={sidebar_open} {close_sidebar} noun_list={source.noun_list} />

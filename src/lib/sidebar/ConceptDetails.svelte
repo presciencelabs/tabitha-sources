@@ -30,7 +30,7 @@
 </script>
 
 {#if data.ontology_data}
-	{@const {stem, sense, level, gloss } = data.ontology_data}
+	{@const { stem, sense, level, gloss } = data.ontology_data}
 	{@const [category, usages] = get_category_and_usage(data)}
 
 	<div class="flex justify-end">

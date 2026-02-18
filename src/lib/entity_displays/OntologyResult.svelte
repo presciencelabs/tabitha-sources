@@ -18,7 +18,7 @@
 		}
 
 		if (!response.ok) {
-			return DEFAULT_DATA
+			data.ontology_data = DEFAULT_DATA
 		}
 
 		/** @type {OntologyResult[]} */
@@ -31,17 +31,17 @@
 </script>
 
 <HoverPopup>
-	{#snippet buttonContent()}
+	{#snippet button_content()}
 		{#if data.sense === 'A'}
 			{data.stem}
 		{:else}
 			{data.stem}-{data.sense}
 		{/if}
 	{/snippet}
-	{#snippet dropdownContent()}
+	{#snippet dropdown_content()}
 		<div class="text-base-content">
 			{#if data.ontology_data}
-				{@const {level, gloss} = data.ontology_data}
+				{@const { level, gloss } = data.ontology_data}
 				<p>
 					<span class="badge badge-outline L{level} badge-sm font-mono me-1">L{level}</span>
 					<span>{gloss}</span>
