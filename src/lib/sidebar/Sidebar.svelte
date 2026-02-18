@@ -38,12 +38,12 @@
 				<!--Ontology Details (if present)-->
 				{#if selected_entity.concept !== null}
 					<SidebarDetail summary_title="Concept Details">
-						{#snippet detailsContent()}
+						{#snippet details_content()}
 							<ConceptDetails data={selected_entity.concept!} />
 						{/snippet}
 					</SidebarDetail>
 					<SidebarDetail summary_title="All Senses">
-						{#snippet detailsContent()}
+						{#snippet details_content()}
 							<AllSenseDetails data={selected_entity.concept!} />
 						{/snippet}
 					</SidebarDetail>
@@ -52,12 +52,12 @@
 				<!--Ontology Details for Pairing (if present)-->
 				{#if selected_entity.pairing_concept !== null}
 					<SidebarDetail summary_title="Concept Details - Pairing">
-						{#snippet detailsContent()}
+						{#snippet details_content()}
 							<ConceptDetails data={selected_entity.pairing_concept!} />
 						{/snippet}
 					</SidebarDetail>
 					<SidebarDetail summary_title="All Senses - Pairing">
-						{#snippet detailsContent()}
+						{#snippet details_content()}
 							<AllSenseDetails data={selected_entity.pairing_concept!} />
 						{/snippet}
 					</SidebarDetail>
@@ -66,7 +66,7 @@
 				<!--Noun List Index-->
 				{#if selected_entity.category === 'Noun'}
 					<SidebarDetail summary_title="Noun List Index">
-						{#snippet detailsContent()}
+						{#snippet details_content()}
 							<NounListDetails data={selected_entity} {noun_list} can_edit={enable_edit} />
 						{/snippet}
 					</SidebarDetail>
@@ -75,7 +75,7 @@
 				<!--Features-->
 				{#if selected_entity.features.length > 0}
 					<SidebarDetail summary_title="Features" start_open={true}>
-						{#snippet detailsContent()}
+						{#snippet details_content()}
 							<FeaturesDetails data={selected_entity} />
 						{/snippet}
 					</SidebarDetail>

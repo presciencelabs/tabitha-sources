@@ -65,7 +65,7 @@ async function load_feature_map(db: D1Database): Promise<FeatureMap> {
 	function by_feature_name(category_entry: [CategoryName, DbFeature[]]): [CategoryName, FeatureInfo[]] {
 		const [category, features] = category_entry
 		const infos = [...Map.groupBy(features, ({ feature }) => feature).entries()]
-			.toSorted(([_, db_features]) => db_features[0].position)
+			.toSorted(([, db_features]) => db_features[0].position)
 			.map(([name, db_features]) => ({ name, values: db_features }))
 		return [category, infos]
 	}
@@ -113,7 +113,7 @@ function feature_codes_to_structure(category: CategoryName, feature_codes: strin
 		const code = feature_code_array[index]
 		const value_info = feature_info.values.find(v => v.code === code)
 		if (!value_info) {
-			console.log(`Unknown '${category}' feature code '${code}' of '${feature_info.name}'`)
+			console.error(`Unknown '${category}' feature code '${code}' of '${feature_info.name}'`)
 		}
 		const value = value_info?.value || ''
 		return { name: feature_info.name, value }
@@ -127,7 +127,7 @@ function feature_structure_to_codes(category: CategoryName, features: EntityFeat
 		const value = features.find(f => f.name.toLowerCase() === feature_info.name.toLowerCase())?.value.toLowerCase()
 		const value_info = feature_info.values.find(v => v.value.toLowerCase() === value)
 		if (value && !value_info) {
-			console.log(`Unknown '${category}' feature value '${value}' of '${feature_info.name}'`)
+			console.error(`Unknown '${category}' feature value '${value}' of '${feature_info.name}'`)
 		}
 		
 		// As a default, first try '.' if it exists as a code, otherwise use the first value
@@ -188,7 +188,7 @@ function decode_concept_data(value: string, category: CategoryName, raw_feature_
 
 function encode_concept_data(entity: SourceEntity): { value: string } {
 	if (entity.concept && entity.pairing_concept) {
-		return { value: `${entity.concept.stem}${entity.pairing_type}${entity.pairing_concept.sense}${entity.pairing_concept.stem}`}
+		return { value: `${entity.concept.stem}${entity.pairing_type}${entity.pairing_concept.sense}${entity.pairing_concept.stem}` }
 	} else if (entity.concept) {
 		return { value: entity.concept.stem }
 	} else {
@@ -197,7 +197,7 @@ function encode_concept_data(entity: SourceEntity): { value: string } {
 }
 
 export function structure_semantic_encoding(entities: SourceEntity[]): PageSourceEntity[] {
-	const new_entities: PageSourceEntity[] = entities.map((entity, i) => ({ ...entity, id: i, parent_id: -1, boundary_category: ''}))
+	const new_entities: PageSourceEntity[] = entities.map((entity, i) => ({ ...entity, id: i, parent_id: -1, boundary_category: '' }))
 
 	const parent_id_stack: number[] = []
 	for (const [i, entity] of new_entities.entries()) {
