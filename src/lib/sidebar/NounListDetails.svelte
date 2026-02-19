@@ -41,7 +41,7 @@
 			<tr class="group">
 				<td class="{is_selected ? 'font-bold' : ''}">{noun_list_entry.index}</td>
 				<td class="{is_selected ? 'font-bold' : ''}">{noun_list_entry.noun}</td>
-				{#if can_edit}
+				{#if can_edit && !is_selected}
 					<td>
 						<div class="invisible group-hover:visible transition-opacity opacity-0 group-hover:opacity-100">
 							<button class="btn btn-xs" onclick={() => set_index(noun_list_entry.index)}>

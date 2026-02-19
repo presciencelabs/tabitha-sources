@@ -161,7 +161,7 @@
 			<SourceEntities {source_entities} {selected_entity} {handle_entity_selected} />
 		</div>
 		{#if sidebar_open}
-			<Sidebar {selected_entity} is_open={sidebar_open} {close_sidebar} {noun_list} enable_edit={true} />
+			<Sidebar bind:selected_entity={selected_entity} is_open={sidebar_open} {close_sidebar} {noun_list} enable_edit={true} />
 		{/if}
 	</div>
 {/if}
