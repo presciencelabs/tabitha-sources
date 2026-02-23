@@ -1,14 +1,8 @@
 <script>
-	/** @type {PageSourceEntity} */
-	export let data
+	/** @type {{ data: PageSourceEntity, noun_list: NounListEntry[], can_edit?: boolean }}*/
+	const { data = $bindable(), noun_list, can_edit=false } = $props()
 
-	/** @type {NounListEntry[]} */
-	export let noun_list
-
-	/** @type {boolean} */
-	export let can_edit = false
-
-	$: next_index = calculate_next_index()
+	const next_index = $derived(calculate_next_index())
 
 	/**
 	 * @param {string} index
@@ -30,7 +24,6 @@
 	function add_and_set_index() {
 		noun_list.push({ index: next_index, noun: `${data.concept?.stem}-${data.concept?.sense}` })
 		set_index(next_index)
-		next_index = calculate_next_index()
 	}
 </script>
 

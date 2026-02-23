@@ -2,7 +2,7 @@
 	import { PUBLIC_EDITOR_API_HOST } from '$env/static/public'
 	import { Navigation, SourceEntities } from '$lib'
 	import type { PageProps } from './$types'
-	import Settings from '$lib/Settings.svelte'
+	import Settings from '$lib/settings/Settings.svelte'
 	import Sidebar from '$lib/sidebar/Sidebar.svelte'
 	import Icon from '@iconify/svelte'
 

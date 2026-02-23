@@ -1,5 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import { CATEGORY_ABBREVIATIONS, CATEGORY_NAME_LOOKUP, WORD_ENTITY_CATEGORIES } from './lookups'
+import { is_boundary_end, is_boundary_start } from './entity_filters'
 
 /**
  * The phase_2_encoding looks something like:
@@ -226,12 +227,4 @@ export function get_noun_list(source: Source): NounListEntry[] {
 			noun: `${entry.slice(1)}-${entry[0]}`,	// the sense is always the first letter
 			index: index < 9 ? `${index + 1}` : String.fromCharCode('A'.charCodeAt(0) + (index - 9)),
 		}))
-}
-
-function is_boundary_start(entity: SourceEntity) {
-	return ['{', '[', '('].includes(entity.value)
-}
-
-function is_boundary_end(entity: SourceEntity) {
-	return ['}', ']', ')'].includes(entity.value)
 }
