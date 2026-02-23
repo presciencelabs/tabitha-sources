@@ -35,7 +35,7 @@ type CheckerLookupResult = {
 	level: number
 	gloss: string
 	categorization: string
-	ontology_status: 'present' | 'pending' | 'absent' | 'unknown'
+	ontology_status: 'in ontology' | 'approved' | 'suggested' | 'not used' | 'unknown'
 	// how_to_entries: HowToEntry[]
 	case_frame: EditorCaseFrame
 }
