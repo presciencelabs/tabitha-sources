@@ -35,6 +35,8 @@ function clean_encoding(entities: EncodingEntity[]): SimpleEncodingEntity[] {
 type RemovableFeature = [string|null, string|null, string|null]
 function simplify_features(features: EntityFeature[], category: string): Record<string, string> {
 	const values_to_remove: RemovableFeature[] = [
+		[null, null, ''],
+		[null, null, '.'],
 		[null, null, 'Not Applicable'],
 		[null, null, 'Unspecified'],
 		[null, 'Sequence', null],
