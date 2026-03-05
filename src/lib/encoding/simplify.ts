@@ -1,29 +1,22 @@
-import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
 
-export async function simplify_encoding(entities: EncodingEntity[], include_glosses: boolean): Promise<SimpleEncodingEntity[]> {
-	const cleaned = await clean_encoding(entities, include_glosses)
+export function simplify_encoding(entities: EncodingEntity[]): SimpleEncodingEntity[] {
+	const cleaned = clean_encoding(entities)
 	const structured = structure_encoding(cleaned)
 	return structured
 }
 
-async function clean_encoding(entities: EncodingEntity[], include_glosses: boolean): Promise<SimpleEncodingEntity[]> {
+function clean_encoding(entities: EncodingEntity[]): SimpleEncodingEntity[] {
 	const end_categories_map: Record<string, string> = {
 		')': 'Phrase End',
 		']': 'Clause End',
 		'}': 'Clause Sentence End',
 	}
-	return await Promise.all(entities.map(async entity => {
+	return entities.map(entity => {
 		const entries: [string, any][] = []
 		entries.push(['category', end_categories_map[entity.value] ?? entity.category])
 		if (entity.concept) {
 			const concept = `${entity.concept.stem}-${entity.concept.sense}`
 			entries.push(['concept', concept])
-			if (include_glosses) {
-				const gloss = await fetch_concept_gloss(concept, entity.category)
-				if (gloss.length) {
-					entries.push(['concept_gloss', gloss])
-				}
-			}
 		}
 		if (entity.pairing_concept) {
 			entries.push(['pairing_concept', `${entity.pairing_concept.stem}-${entity.pairing_concept.sense}`])
@@ -36,17 +29,7 @@ async function clean_encoding(entities: EncodingEntity[], include_glosses: boole
 			entries.push(['features', simple_features])
 		}
 		return Object.fromEntries(entries) as SimpleEncodingEntity
-	}))
-}
-
-async function fetch_concept_gloss(concept: string, category: string): Promise<string> {
-	const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=${concept}&category=${category}`)
-	if (!response.ok) {
-		return ''
-	}
-	const result: OntologyResult[] = await response.json()
-	const gloss = result.length ? result[0].gloss : ''
-	return gloss.replace(/\((universal primitive|LDV|complex|complex alternate|inexplicable)\) /, '')
+	})
 }
 
 type RemovableFeature = [string|null, string|null, string|null]
@@ -91,6 +74,8 @@ function structure_encoding(encoding: SimpleEncodingEntity[]): SimpleEncodingEnt
 			if (!parent_stack.length) {
 				structured.push(parent)
 			}
+		} else if (entity.category === 'period') {
+			// don't bother including the periods
 		} else if (parent_stack.length) {
 			parent_stack.at(-1)!!.children?.push(entity)
 		}
