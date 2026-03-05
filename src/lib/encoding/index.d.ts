@@ -7,17 +7,20 @@ type SourceEntity = {
 type SourceFeatures = {
 	feature_codes: string
 	features: EntityFeature[]
+	noun_list_index: string|null
 }
 
 type SourceConceptData = {
 	concept: SourceConcept|null
 	pairing_concept: SourceConcept|null
+	pairing_type: string
 }
 
 type SourceConcept = {
 	stem: string
 	sense: string
 	part_of_speech: string
+	ontology_data?: OntologyResult
 }
 
 type EntityFilter = (entity: SourceEntity) => boolean
@@ -46,6 +49,10 @@ type TargetApiFeatureResult = {
 	lexical: TargetApiFeature[]
 }
 
+type FeatureValueInfo = { value: FeatureValue, code: string }
+type FeatureInfo = { name: FeatureName, values: FeatureValueInfo[] }
+type FeatureMap = Map<CategoryName, FeatureInfo[]>
+
 type ApiFeature = DbFeature
 
 type OntologyResult = {
@@ -54,9 +61,7 @@ type OntologyResult = {
 	part_of_speech: string
 	level: string
 	gloss: string
-	// TODO include more info?
-	// brief_gloss: string
-	// categorization: string[]
+	categories: string[]
 }
 
 type TargetEntity = {
