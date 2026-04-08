@@ -75,6 +75,7 @@ export function decode_features(raw_feature_codes: string, category: CategoryNam
 }
 
 function encode_features(entity: SourceEntity): string {
+	// Encode the entity's features into the TBTA-compatible format
 	if (entity.concept) {
 		// The '1' is supposed to represent the complexity level, but is set at generation time. So it is always 1 in the encoding.
 		return `1${entity.concept.sense}${entity.noun_list_index || ''}${entity.feature_codes}`
@@ -124,20 +125,3 @@ export async function transform_features_to_codes(db: D1Database, source_entitie
 		return { ...entity, feature_codes, features: new_features }
 	})
 }
-
-// function get_feature_value(category: CategoryName, position: number, feature_code: string, all_features: Map<string, DbFeature[]>): EntityFeature {
-// 	// Add 1 to position because the position in the db is not zero-based like an index
-// 	const feature_key = `${category}:${position + 1}`
-// 	const db_features = all_features.get(feature_key)
-// 	if (!db_features) {
-// 		return {
-// 			name: `Unknown feature at ${position+1}`,
-// 			value: feature_code,
-// 		}
-// 	}
-// 	const result = db_features.find(({ code }) => code === feature_code)
-// 	return {
-// 		name: result?.feature ?? db_features[0].feature,
-// 		value: result?.value ?? feature_code,
-// 	}
-// }

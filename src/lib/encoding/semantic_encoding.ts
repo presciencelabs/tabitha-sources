@@ -127,6 +127,7 @@ function decode_concept_data(value: string, category: CategoryName, raw_feature_
 }
 
 function encode_concept_data(entity: SourceEntity): { value: string } {
+	// Encode the concept entity data back into the TBTA-compatible format for storage and generation
 	if (entity.concept && entity.pairing_concept) {
 		return { value: `${entity.concept.stem}${entity.pairing_type}${entity.pairing_concept.sense}${entity.pairing_concept.stem}` }
 	} else if (entity.concept) {

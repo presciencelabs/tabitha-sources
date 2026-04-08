@@ -12,7 +12,7 @@ function clean_encoding(entities: EncodingEntity[]): SimpleEncodingEntity[] {
 		'}': 'Clause Sentence End',
 	}
 	return entities.map(entity => {
-		const entries: [string, any][] = []
+		const entries: [string, unknown][] = []
 		entries.push(['category', end_categories_map[entity.value] ?? entity.category])
 		if (entity.concept) {
 			const concept = `${entity.concept.stem}-${entity.concept.sense}`
@@ -59,8 +59,7 @@ function simplify_features(features: EntityFeature[], category: string): Record<
 	const feature_entries = features.map(({ name, value }) => [name, value])
 		.filter(([name]) => name.length)
 		.filter(([name, value]) => 
-			!values_to_remove.some(([_, rm_name, rm_value]) => (rm_name === null || rm_name === name) && (rm_value === null || rm_value === value))
-		)
+			!values_to_remove.some(([, rm_name, rm_value]) => (rm_name === null || rm_name === name) && (rm_value === null || rm_value === value)))
 	return Object.fromEntries(feature_entries)
 }
 
@@ -72,14 +71,14 @@ function structure_encoding(encoding: SimpleEncodingEntity[]): SimpleEncodingEnt
 	const start_categories = ['Clause', 'Noun Phrase', 'Verb Phrase', 'Adjective Phrase', 'Adverb Phrase']
 	for (const entity of encoding) {
 		if (end_categories.includes(entity.category)) {
-			const parent = parent_stack.pop()!!
+			const parent = parent_stack.pop()!
 			if (!parent_stack.length) {
 				structured.push(parent)
 			}
 		} else if (entity.category === 'period') {
 			// don't bother including the periods
 		} else if (parent_stack.length) {
-			parent_stack.at(-1)!!.children?.push(entity)
+			parent_stack.at(-1)!.children?.push(entity)
 		}
 
 		if (start_categories.includes(entity.category)) {

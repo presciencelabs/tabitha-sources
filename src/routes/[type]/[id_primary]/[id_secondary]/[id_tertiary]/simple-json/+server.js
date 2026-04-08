@@ -25,7 +25,7 @@ export async function GET({ locals: { db }, params: { type, id_primary, id_secon
 		return json({ encoding: simple_encoding, glosses })
 	}
 
-	return json({ encoding: simple_encoding})
+	return json({ encoding: simple_encoding })
 }
 
 /**

@@ -87,6 +87,6 @@ type SimpleEncodingEntity = {
 	concept?: string
 	pairing_concept?: string
 	target?: string
-	features?: EntityFeature[]
+	features?: Record<FeatureName, FeatureValue>
 	children?: SimpleEncodingEntity[]
 }
