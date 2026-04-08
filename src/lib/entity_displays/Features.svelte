@@ -1,9 +1,9 @@
 <script>
-	/** @type {SourceEntity} */
-	export let source_entity
-	export let classes = ''
+	/** @type {{ source_entity: SourceEntity, classes: string }} */
+	let { source_entity, classes } = $props()
 
-	const { category, features } = source_entity
+	let category = source_entity.category
+	let features = source_entity.features
 
 	const last_feature_to_display = features.findLastIndex(({ name }) => !name.startsWith('Spare'))
 	const features_to_display = features.slice(0, last_feature_to_display + 1)
