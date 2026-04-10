@@ -55,15 +55,15 @@
 				</td>
 				<td>{gloss}</td>
 				<td><span class="badge badge-outline L{level} badge-xs font-mono me-1">L{level}</span></td>
-				{#if !is_selected}
-					<td>
+				<td>
+					{#if !is_selected}
 						<div class="invisible group-hover:visible transition-opacity opacity-0 group-hover:opacity-100">
 							<button class="btn btn-xs" onclick={() => set_sense(sense)}>
 								Set
 							</button>
 						</div>
-					</td>
-				{/if}
+					{/if}
+				</td>
 			</tr>
 		{/each}
 	</tbody>

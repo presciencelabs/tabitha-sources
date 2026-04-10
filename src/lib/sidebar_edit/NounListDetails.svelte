@@ -34,15 +34,15 @@
 			<tr class="group">
 				<td class="{is_selected ? 'font-bold' : ''}">{noun_list_entry.index}</td>
 				<td class="{is_selected ? 'font-bold' : ''}">{noun_list_entry.noun}</td>
-				{#if !is_selected}
-					<td>
+				<td>
+					{#if !is_selected}
 						<div class="invisible group-hover:visible transition-opacity opacity-0 group-hover:opacity-100">
 							<button class="btn btn-xs" onclick={() => set_index(noun_list_entry.index)}>
 								Set index
 							</button>
 						</div>
-					</td>
-				{/if}
+					{/if}
+				</td>
 			</tr>
 		{/each}
 		<tr class="group">
