@@ -5,6 +5,19 @@
 	let filtered_features = $derived(data.features.filter(({ name }) => !name.includes('Spare')))
 	let category_features = $derived(all_features.get(data.category) ?? [])
 
+	$effect(() => {
+		if (data.category === 'Noun Phrase') {
+			// Update the semantic role feature code.
+			// We only care about the semantic role code because it's the only one that is currently displayed.
+			// If we end up displaying more, we can use the feature_structure_to_codes() function in encoding/features.ts
+			const semantic_role_value = data.features.find(f => f.name === 'Semantic Role')?.value
+			const semantic_role_code = category_features.find(f => f.name === 'Semantic Role')?.values.find(v => v.value === semantic_role_value)?.code
+			if (semantic_role_code) {
+				data.feature_codes = data.feature_codes.slice(0, 1) + semantic_role_code + data.feature_codes.slice(2)
+			}
+		}
+	})
+
 	/**
 	 * @param {EntityFeature} feature
 	 * @returns {boolean}

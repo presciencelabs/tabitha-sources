@@ -1,6 +1,6 @@
 <script>
-	/** @type {{ source_entity: SourceEntity, classes: string }} */
-	let { source_entity, classes } = $props()
+	/** @type {{ source_entity: SourceEntity, classes?: string }} */
+	let { source_entity, classes='' } = $props()
 
 	let category = source_entity.category
 	let features = source_entity.features
