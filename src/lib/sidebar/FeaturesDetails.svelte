@@ -1,8 +1,8 @@
 <script>
-	/** @type {PageSourceEntity} */
-	export let data
+	/** @type {{ data: PageSourceEntity }} */
+	const { data } = $props()
 
-	$: filtered_features = data.features.filter(({ name }) => !name.includes('Spare'))
+	let filtered_features = $derived(data.features.filter(({ name }) => !name.includes('Spare')))
 
 	/**
 	 * @param {EntityFeature} feature
