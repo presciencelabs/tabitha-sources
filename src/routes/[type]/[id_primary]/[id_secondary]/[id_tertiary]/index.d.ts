@@ -7,6 +7,7 @@ type Source = {
 	phase_1_encoding: string
 	semantic_encoding: string
 	comments: string
+	status: SourceStatus
 	notes: string
 }
 
