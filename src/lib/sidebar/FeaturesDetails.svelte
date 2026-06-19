@@ -1,8 +1,10 @@
 <script>
+	import { is_used_in_source } from '$lib/encoding/features'
+
 	/** @type {{ data: PageSourceEntity }} */
 	const { data } = $props()
 
-	let filtered_features = $derived(data.features.filter(({ name }) => !name.includes('Spare')))
+	let filtered_features = $derived(data.features.filter(is_used_in_source(data.category)))
 
 	/**
 	 * @param {EntityFeature} feature

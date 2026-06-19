@@ -1,8 +1,10 @@
 <script>
+	import { is_used_in_source } from '$lib/encoding/features'
+
 	/** @type {{ data: PageSourceEntity, all_features: FeatureMap }} */
 	const { data = $bindable(), all_features } = $props()
 
-	let filtered_features = $derived(data.features.filter(({ name }) => !name.includes('Spare')))
+	let filtered_features = $derived(data.features.filter(is_used_in_source(data.category)))
 	let category_features = $derived(all_features.get(data.category) ?? [])
 
 	$effect(() => {
@@ -33,11 +35,11 @@
 	<table class="table table-sm table-zebra">
 		<tbody>
 			{#each data.features as feature}
-				{#if !feature.name.includes('Spare')}
+				{#if is_used_in_source(data.category)(feature)}
 					{@const possible_values = category_features.find(f => f.name === feature.name)?.values || []}
-					<tr class='{can_be_dulled(feature) ? 'opacity-50' : ''}'>
-						<td>{feature.name}</td>
-						<td>
+					<tr class="{can_be_dulled(feature) ? 'opacity-50' : ''}">
+						<td class="w-2/5">{feature.name}</td>
+						<td class="w-3/5">
 							<select bind:value={feature.value} class="select select-sm">
 								{#each possible_values as value}
 									<option value={value.value}>{value.value}</option>
