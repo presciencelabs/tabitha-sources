@@ -38,7 +38,7 @@
 					<tr class='{can_be_dulled(feature) ? 'opacity-50' : ''}'>
 						<td>{feature.name}</td>
 						<td>
-							<select bind:value={feature.value} class="select select-sm select-ghost">
+							<select bind:value={feature.value} class="select select-sm">
 								{#each possible_values as value}
 									<option value={value.value}>{value.value}</option>
 								{/each}
