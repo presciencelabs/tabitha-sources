@@ -1,9 +1,18 @@
 import type { D1Database } from '@cloudflare/workers-types'
-import { get_primary_ids } from './read'
 
 export async function get_all_book_statuses(db: D1Database, type: string): Promise<StatusResult[]> {
-	const primary_ids = await get_primary_ids(db, type)
-	return await Promise.all(primary_ids.map(({ id_primary }) => get_book_status(db, { type, id_primary })))
+	const sql = `
+		SELECT status, id_primary
+		FROM ChapterStatus
+		WHERE type LIKE ?
+	`
+	const { results } = await db.prepare(sql).bind(type).all<{ status: SourceStatus, id_primary: string }>()
+	const by_book = Map.groupBy(results, result => result.id_primary)
+
+	return by_book.entries().map(([id_primary, statuses]) => ({
+		reference: { type, id_primary },
+		status: combine_statuses(statuses),
+	})).toArray()
 }
 
 export async function get_book_status(db: D1Database, reference: StatusRequestReference): Promise<StatusResult> {
@@ -15,8 +24,14 @@ export async function get_book_status(db: D1Database, reference: StatusRequestRe
 	`
 
 	const { results } = await db.prepare(sql).bind(reference.type, reference.id_primary).all<{ status: SourceStatus }>()
-	const chapter_statuses = results.map(({ status }) => status)
+	return {
+		reference,
+		status: combine_statuses(results)
+	}
+}
 
+function combine_statuses(status_array: { status: SourceStatus }[]) {
+	const just_statuses = status_array.map(({ status }) => status)
 	const status_mapping: [(statuses: SourceStatus[]) => boolean, SourceStatus][] = [
 		[statuses => statuses.every(s => s === 'Ready to Translate'), 'Ready to Translate'],
 		[statuses => statuses.every(s => s === 'Not Started'), 'Not Started'],
@@ -25,11 +40,22 @@ export async function get_book_status(db: D1Database, reference: StatusRequestRe
 		[statuses => statuses.some(s => s === 'Final Review in Progress'), 'Final Review in Progress'],
 		[() => true, 'Initial Analysis Complete'],
 	]
+	return just_statuses.length ? status_mapping.find(([predicate]) => predicate(just_statuses))![1] : 'Not Started'
+}
 
-	return {
-		reference,
-		status: chapter_statuses.length ? status_mapping.find(([predicate]) => predicate(chapter_statuses))![1] : 'Not Started',
-	}
+export async function get_chapter_statuses_for_book(db: D1Database, reference: StatusRequestReference): Promise<StatusResult[]> {
+	const sql = `
+		SELECT id_secondary, status
+		FROM ChapterStatus
+		WHERE type LIKE ?
+			AND id_primary LIKE ?
+	`
+
+	const { results } = await db.prepare(sql).bind(reference.type, reference.id_primary).all<{ id_secondary: string, status: SourceStatus }>()
+	return results.map(({ id_secondary, status }) => ({
+		reference: { ...reference, id_secondary },
+		status,
+	}))
 }
 
 export async function get_chapter_status(db: D1Database, reference: StatusRequestReference): Promise<StatusResult> {
