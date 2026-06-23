@@ -157,7 +157,7 @@
 
 {#if !analyzing}
 	<div class="divider my-2"></div>
-	<div class="flex h-screen">
+	<div class="flex h-screen overflow-y-auto">
 		<div class="transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '24rem' : '0'};">
 			<SourceEntities {source_entities} {selected_entity} {handle_entity_selected} />
 		</div>
