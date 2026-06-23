@@ -61,11 +61,15 @@
 		entity_context_menu_open = true
 	}
 
-	function close_entity_context_menu(recalculate: boolean) {
+	function close_entity_context_menu(recalculate: boolean, id_to_select?: number) {
 		entity_context_menu_open = false
 		if (recalculate) {
 			structure_entities(source_entities)
-			on_entity_select(null)
+			if (id_to_select) {
+				entity_focus(id_to_select)
+			} else if (id_to_select === -1) {
+				on_entity_select(null)
+			}
 		}
 	}
 
