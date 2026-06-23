@@ -52,8 +52,8 @@
 {/if}
 
 {#if source.parsed_semantic_encoding.length > 0}
-	<div class="flex h-screen overflow-y-auto">
-		<div class="transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '24rem' : '0'};">
+	<div class="flex h-screen">
+		<div class="overflow-y-auto transition-all duration-300 flex-[1_1_auto]" style="margin-right: {sidebar_open ? '24rem' : '0'};">
 			<SourceEntities source_entities={source.parsed_semantic_encoding} {selected_entity} {handle_entity_selected} />
 		</div>
 		{#if sidebar_open}
