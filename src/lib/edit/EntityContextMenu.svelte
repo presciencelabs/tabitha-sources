@@ -44,11 +44,6 @@
 	}
 
 	function delete_entity() {
-		source_entities.splice(data.entity_id, 1)
-		onclose(true, data.entity_id - 1)
-	}
-
-	function delete_entity_and_children() {
 		source_entities.splice(data.entity_id, get_range_length())
 		onclose(true, data.entity_id - 1)
 	}
@@ -76,8 +71,5 @@
 		<li><button onclick={copy_entity}>Copy</button></li>
 		<li><button onclick={cut_entity}>Move</button></li>
 		<li><button onclick={delete_entity}>Delete</button></li>
-		{#if is_boundary_start(entity)}
-			<li><button onclick={delete_entity_and_children}>Delete whole {entity.category}</button></li>
-		{/if}
 	</ul>
 </div>
