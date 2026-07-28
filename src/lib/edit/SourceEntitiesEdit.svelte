@@ -3,8 +3,9 @@
 	import BoundaryEnd from '../entity_displays/BoundaryEnd.svelte'
 	import BoundaryStart from '../entity_displays/BoundaryStart.svelte'
 	import Punctuation from '../entity_displays/Punctuation.svelte'
-	import { is_boundary_end, is_boundary_start } from '$lib/encoding/entity_filters'
 	import EntityContextMenu from './EntityContextMenu.svelte'
+	import InsertEntityContextMenu from './InsertEntityContextMenu.svelte'
+	import { is_boundary_end, is_boundary_start } from '$lib/encoding/entity_filters'
 	import { structure_entities } from '$lib/encoding/structured'
 
 	type IndexRange = [number, number]
@@ -15,8 +16,6 @@
 		on_entity_select: (entity: PageSourceEntity|null) => void
 	}
 	let { source_entities = $bindable(), selected_entity, on_entity_select }: Props = $props()
-
-	// let entity_divs: HTMLElement[] = $state([])
 
 	let hover_range: IndexRange | null = $state(null)
 	let select_range: IndexRange | null = $derived(
@@ -43,8 +42,8 @@
 		[() => true, Punctuation],
 	]
 
-	let entity_context_menu_open = $state(false)
 	let entity_context_menu_data: EntityContextMenuData = $state({
+		is_open: false,
 		entity_id: -1,
 		x: 0,
 		y: 0,
@@ -54,15 +53,43 @@
 		event.stopPropagation()
 		event.preventDefault()
 		entity_context_menu_data = {
+			is_open: true,
 			entity_id,
 			x: event.clientX,
 			y: event.clientY,
 		}
-		entity_context_menu_open = true
 	}
 
 	function close_entity_context_menu(recalculate: boolean, id_to_select?: number) {
-		entity_context_menu_open = false
+		entity_context_menu_data.is_open = false
+		close_context_menu(recalculate, id_to_select)
+	}
+
+	let insert_context_menu_data: EntityContextMenuData = $state({
+		is_open: false,
+		entity_id: -1,
+		x: 0,
+		y: 0,
+	})
+
+	function open_insert_context_menu(event: any, entity_id: number) {
+		event.stopPropagation()
+		event.preventDefault()
+		insert_context_menu_data = {
+			is_open: true,
+			entity_id,
+			x: event.clientX,
+			y: event.clientY,
+		}
+	}
+
+	function close_insert_context_menu(recalculate: boolean, id_to_select?: number) {
+		insert_context_menu_data.is_open = false
+		insert_context_menu_data.entity_id = -1
+		close_context_menu(recalculate, id_to_select)
+	}
+
+	function close_context_menu(recalculate: boolean, id_to_select?: number) {
 		if (recalculate) {
 			structure_entities(source_entities)
 			if (id_to_select) {
@@ -108,12 +135,25 @@
 			return [i, i]
 		}
 	}
+
+	function insert_button_in_range(i: number, range: IndexRange|null) {
+		return !!range?.length && (i > range[0] && i <= range[range.length - 1])
+	}
 </script>
 
 <div class="inline-flex flex-wrap py-3">
 	{#each source_entities as entity}
 		{@const i = entity.id}
 		{@const Component = component_filters.find(([filter]) => filter(entity))?.[1]}
+
+		<div class="{insert_button_in_range(i, hover_range) || insert_button_in_range(i, select_range) ? entity_highlights[i] : ''}">
+			<button class="btn btn-xs mt-4 h-12 w-4 text-lg {insert_context_menu_data.entity_id === i ? "opacity-100" : "opacity-0"} hover:opacity-100 transition-opacity duration-150"
+				onclick={e => open_insert_context_menu(e, i)}
+				aria-label="Insert Constituent">
+				+
+			</button>
+		</div>
+
 		<div role="button" tabindex="0" class="id-{i} cursor-pointer content-center h-20 {entity_highlights[i]}"
 				onclick={() => entity_focus(i)}
 				onkeydown={e => (e.key === 'Enter' || e.key === ' ') && entity_focus(i)}
@@ -121,12 +161,20 @@
 				onfocus={() => entity_focus(i)}
 				onmouseleave={entity_mouseout}
 				onblur={() => {}}
-				oncontextmenu={event => open_entity_context_menu(event, i)} >
+				onclick={e => open_entity_context_menu(e, i)}
+				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && open_entity_context_menu(e, i)}>
 			<Component source_entity={entity} />
 		</div>
 	{/each}
 
-	{#if entity_context_menu_open}
+	{#if insert_context_menu_data.is_open}
+		<InsertEntityContextMenu
+				bind:source_entities={source_entities}
+				data={insert_context_menu_data}
+				onclose={close_insert_context_menu} />
+	{/if}
+
+	{#if entity_context_menu_data.is_open}
 		<EntityContextMenu
 				bind:source_entities={source_entities}
 				data={entity_context_menu_data}
