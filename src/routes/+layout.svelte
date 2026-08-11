@@ -7,8 +7,8 @@
 	let { children }: { children?: Snippet } = $props()
 
 	onNavigate(navigation => {
-		// Skip view transitions for non-supporting browsers, native form posts, or non-route unloads
-		if (!document.startViewTransition || navigation.type === 'form' || !navigation.to?.route.id) return
+		// Skip view transitions for non-supporting browsers, full page unloads (like native GET forms), or non-route navigations
+		if (!document.startViewTransition || navigation.willUnload || !navigation.to?.route.id) return
 
 		return new Promise(resolve => {
 			document.startViewTransition(async () => {
