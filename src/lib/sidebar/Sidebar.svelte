@@ -32,32 +32,27 @@
 			</section>
 
 			<section>
+				{#snippet concept_sections(concept: SourceConcept, suffix: string)}
+					<SidebarDetail summary_title="Concept Details{suffix}">
+						{#snippet details_content()}
+							<ConceptDetails data={concept} />
+						{/snippet}
+					</SidebarDetail>
+					<SidebarDetail summary_title="All Senses{suffix}">
+						{#snippet details_content()}
+							<AllSenseDetails data={concept} />
+						{/snippet}
+					</SidebarDetail>
+				{/snippet}
+
 				<!--Ontology Details (if present)-->
 				{#if entity.concept !== null}
-					<SidebarDetail summary_title="Concept Details">
-						{#snippet details_content()}
-							<ConceptDetails data={entity!.concept!} />
-						{/snippet}
-					</SidebarDetail>
-					<SidebarDetail summary_title="All Senses">
-						{#snippet details_content()}
-							<AllSenseDetails data={entity!.concept!} />
-						{/snippet}
-					</SidebarDetail>
+					{@render concept_sections(entity.concept, '')}
 				{/if}
 
 				<!--Ontology Details for Pairing (if present)-->
 				{#if entity.pairing_concept !== null}
-					<SidebarDetail summary_title="Concept Details - Pairing">
-						{#snippet details_content()}
-							<ConceptDetails data={entity!.pairing_concept!} />
-						{/snippet}
-					</SidebarDetail>
-					<SidebarDetail summary_title="All Senses - Pairing">
-						{#snippet details_content()}
-							<AllSenseDetails data={entity!.pairing_concept!} />
-						{/snippet}
-					</SidebarDetail>
+					{@render concept_sections(entity.pairing_concept, ' - Pairing')}
 				{/if}
 
 				<!--Noun List Index-->
