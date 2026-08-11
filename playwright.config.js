@@ -19,5 +19,7 @@ export default defineConfig({
 	webServer: {
 		command: 'pnpm build && pnpm dev',
 		port: 8789,
+		// Reuse active dev server locally to prevent port conflicts; start fresh server in CI
+		reuseExistingServer: !process.env.CI,
 	},
 })
