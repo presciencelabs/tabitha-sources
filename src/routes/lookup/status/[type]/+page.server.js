@@ -7,7 +7,7 @@ export async function load({ locals: { db }, params: { type } }) {
 
 	// group and order the primary_ids
 	const groupings = primary_id_groupings[type] || { [type]: [1, statuses.length] }
-	const primary_id_to_order_map = Object.fromEntries(Object.entries(ordered_primary_ids[type]).map(([i, name]) => ([name, Number(i)])))
+	const primary_id_to_order_map = Object.fromEntries(Object.entries(ordered_primary_ids[type]).map(([i, name]) => [name, Number(i)]))
 
 	let status_groups = Object.entries(groupings).map(([group_name, range]) => {
 		const [start, end] = range

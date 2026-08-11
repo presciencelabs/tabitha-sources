@@ -23,7 +23,7 @@
 		!selected_entity ? null
 			: is_boundary_start(selected_entity)
 				? get_boundary_range(selected_entity.id)
-				: [selected_entity.id, selected_entity.id]
+				: [selected_entity.id, selected_entity.id],
 	)
 
 	let entity_highlights: string[] = $derived(source_entities.map((_, i) => {
@@ -50,7 +50,7 @@
 		y: 0,
 	})
 
-	function open_entity_context_menu(event: any, entity_id: number) {
+	function open_entity_context_menu(event: MouseEvent, entity_id: number) {
 		event.stopPropagation()
 		event.preventDefault()
 		entity_context_menu_data = {

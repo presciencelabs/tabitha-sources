@@ -26,7 +26,7 @@ export async function get_book_status(db: D1Database, reference: StatusRequestRe
 	const { results } = await db.prepare(sql).bind(reference.type, reference.id_primary).all<{ status: SourceStatus }>()
 	return {
 		reference,
-		status: combine_statuses(results)
+		status: combine_statuses(results),
 	}
 }
 

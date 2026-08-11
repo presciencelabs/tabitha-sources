@@ -21,7 +21,7 @@
 		!selected_entity ? null
 			: is_boundary_start(selected_entity)
 				? get_boundary_range(selected_entity.id)
-				: [selected_entity.id, selected_entity.id]
+				: [selected_entity.id, selected_entity.id],
 	)
 
 	let entity_highlights = $derived(source_entities.map((_, i) => {
