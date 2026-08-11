@@ -14,7 +14,7 @@
 
 <div class="prose mb-5">
 	<h2>Encoding Status - {book_status.reference.id_primary}</h2>
-	<p><EncodingStatus status={book_status.status} /></p>
+	<div><EncodingStatus status={book_status.status} /></div>
 </div>
 
 <div>
@@ -39,7 +39,7 @@
 			<div class="card flex-none w-45 bg-base-100 card-xs shadow-sm">
 				<div class="card-body">
 					<h2 class="card-title">{reference.id_secondary}</h2>
-					<p><EncodingStatus {status} classes="badge-sm" /></p>
+					<div><EncodingStatus {status} classes="badge-sm" /></div>
 				</div>
 			</div>
 		{/each}
