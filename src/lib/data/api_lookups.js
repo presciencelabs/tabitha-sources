@@ -35,21 +35,33 @@ export async function fetch_concept_ontology_data(concept) {
 	}
 }
 
+/** @type {Map<string, OntologyResult[]>} */
+const all_senses_cache = new Map()
+
+/** @type {Map<string, OntologyResult[]>} */
+const category_cache = new Map()
+
 /**
  * @param {string} part_of_speech
  * @returns {Promise<OntologyResult[]>}
  */
 export async function fetch_all_concepts_for_part_of_speech(part_of_speech) {
-	const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=*&category=${part_of_speech}`)
-
-	if (!response.ok) {
-		return []
+	if (category_cache.has(part_of_speech)) {
+		return category_cache.get(part_of_speech) ?? []
 	}
 
-	/** @type {OntologyResult[]} */
-	const results = await response.json()
+	try {
+		const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=*&category=${part_of_speech}`)
+		if (!response.ok) return []
 
-	return results.filter(result => result.status === 'in ontology')
+		/** @type {OntologyResult[]} */
+		const results = await response.json()
+		const filtered = results.filter(result => result.status === 'in ontology')
+		category_cache.set(part_of_speech, filtered)
+		return filtered
+	} catch {
+		return []
+	}
 }
 
 /**
@@ -58,15 +70,22 @@ export async function fetch_all_concepts_for_part_of_speech(part_of_speech) {
  */
 export async function fetch_ontology_data_for_all_senses(concept) {
 	const { stem, part_of_speech } = concept
-	const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=${stem}&category=${part_of_speech}`)
+	const cache_key = `${stem}:${part_of_speech}`
 
-	if (!response.ok) {
-		return []
+	if (all_senses_cache.has(cache_key)) {
+		return all_senses_cache.get(cache_key) ?? []
 	}
 
-	/** @type {OntologyResult[]} */
-	const results = await response.json()
-	
-	// Use the result that exactly matches the original stem (eg. "lot" vs "Lot")
-	return results.filter(result => result.stem === stem && result.status === 'in ontology')
+	try {
+		const response = await fetch(`${PUBLIC_ONTOLOGY_API_HOST}/search?q=${stem}&category=${part_of_speech}`)
+		if (!response.ok) return []
+
+		/** @type {OntologyResult[]} */
+		const results = await response.json()
+		const filtered = results.filter(result => result.stem === stem && result.status === 'in ontology')
+		all_senses_cache.set(cache_key, filtered)
+		return filtered
+	} catch {
+		return []
+	}
 }
