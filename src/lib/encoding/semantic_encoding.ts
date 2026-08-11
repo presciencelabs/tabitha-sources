@@ -88,30 +88,44 @@ export async function transform_target_encoding(db: D1Database, semantic_encodin
 	}
 }
 
+interface ConceptPairingMatch {
+	stem: string
+	pairing_type: string
+	pairing_sense: string
+	pairing_stem: string
+}
+
+function parse_concept_pairing(value: string): ConceptPairingMatch | null {
+	// follower/Adisciple -> follower / disciple-A
+	const EXTRACT_PAIRING = /^(.+?)([\\/])([A-Z])(.+)$/
+	const match = value.match(EXTRACT_PAIRING)
+	if (!match) return null
+
+	const [, stem, pairing_type, pairing_sense, pairing_stem] = match
+	return { stem, pairing_type, pairing_sense, pairing_stem }
+}
+
 function decode_concept_data(value: string, category: CategoryName, raw_feature_codes: string): SourceConceptData {
 	if (!WORD_ENTITY_CATEGORIES.has(category)) {
 		return { concept: null, pairing_concept: null, pairing_type: '' }
 	}
 
 	const sense = raw_feature_codes[1]
+	const pairing = parse_concept_pairing(value)
 
-	// follower/Adisciple -> follower / disciple-A
-	const EXTRACT_PAIRING = /^(.+?)([\\/])([A-Z])(.+)$/
-	const match = value.match(EXTRACT_PAIRING)
-	if (match) {
-		const [, stem, pairing_type, pairing_sense, pairing_stem] = match
+	if (pairing) {
 		return {
 			concept: {
-				stem,
+				stem: pairing.stem,
 				sense,
 				part_of_speech: category,
 			},
 			pairing_concept: {
-				stem: pairing_stem,
-				sense: pairing_sense,
+				stem: pairing.pairing_stem,
+				sense: pairing.pairing_sense,
 				part_of_speech: category,
 			},
-			pairing_type,
+			pairing_type: pairing.pairing_type,
 		}
 	}
 
