@@ -13,6 +13,7 @@
     "dev": "vite dev",
     "test:unit": "vitest run src",
     "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e",
     "precommit": "pnpm check && pnpm build && pnpm test",
     "clean:svelte": "rimraf .svelte-kit",
     "clean:node": "rimraf node_modules",
