@@ -114,7 +114,9 @@
 	{#each source_entities as entity}
 		{@const i = entity.id}
 		{@const Component = component_filters.find(([filter]) => filter(entity))?.[1]}
-		<div role="button" tabindex="0" class="id-{i} cursor-default content-center h-20 {entity_highlights[i]}"
+		<div role="button" tabindex="0" class="id-{i} cursor-pointer content-center h-20 {entity_highlights[i]}"
+				onclick={() => entity_focus(i)}
+				onkeydown={e => (e.key === 'Enter' || e.key === ' ') && entity_focus(i)}
 				onmouseenter={() => entity_mouseover(i)}
 				onfocus={() => entity_focus(i)}
 				onmouseleave={entity_mouseout}
