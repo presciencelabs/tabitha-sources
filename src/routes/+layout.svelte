@@ -1,10 +1,21 @@
 <script lang="ts">
 	import '$lib/app.css'
 	import type { Snippet } from 'svelte'
-
+	import { onNavigate } from '$app/navigation'
 	import { Brand, Search } from '$lib'
 
 	let { children }: { children?: Snippet } = $props()
+
+	onNavigate(navigation => {
+		if (!document.startViewTransition) return
+
+		return new Promise(resolve => {
+			document.startViewTransition(async () => {
+				resolve()
+				await navigation.complete
+			})
+		})
+	})
 </script>
 
 <!-- layout not handled by daisyUI, https://daisyui.com/docs/layout-and-typography -->
