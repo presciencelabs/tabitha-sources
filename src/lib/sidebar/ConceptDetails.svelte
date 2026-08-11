@@ -1,23 +1,14 @@
-<script>
+<script lang="ts">
 	import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
 	import Icon from '@iconify/svelte'
 
-	/** @type {SourceConcept} */
-	export let data
+	let { data }: { data: SourceConcept } = $props()
 
-	/**
-	 * @param {SourceConcept} concept
-	 * @returns {string} fully-qualified URL to the ontology API
-	 */
-	function get_ontology_url_for_link({ stem, part_of_speech }) {
+	function get_ontology_url_for_link({ stem, part_of_speech }: SourceConcept) {
 		return `${PUBLIC_ONTOLOGY_API_HOST}/?q=${stem}&category=${part_of_speech}`
 	}
 
-	/**
-	 * @param {SourceConcept} concept
-	 * @returns {[string, string[]]}
-	 */
-	function get_category_and_usage(concept) {
+	function get_category_and_usage(concept: SourceConcept): [string, string[]] {
 		const categories = concept.ontology_data?.categories || []
 		if (concept.part_of_speech === 'Noun') {
 			return [categories.at(0) ?? '', []]
