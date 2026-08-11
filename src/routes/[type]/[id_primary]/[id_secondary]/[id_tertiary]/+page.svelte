@@ -24,6 +24,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{source.id_primary} {source.id_secondary}:{source.id_tertiary} - TaBiThA Sources</title>
+</svelte:head>
+
 <div class="grid justify-items-stretch grid-cols-3 pb-5">
 	<div class="justify-self-start">
 		<Settings />
