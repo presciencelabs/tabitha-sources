@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
 	import EncodingStatus from '$lib/EncodingStatus.svelte'
 
-	const { data } = $props()
+	let { data } = $props()
 
-	const book_status = data.book_status
-	const chapter_statuses = data.chapter_statuses
+	let book_status = $derived(data.book_status)
+	let chapter_statuses = $derived(data.chapter_statuses)
 
 	let statuses_present = $derived(new Set(chapter_statuses.map(s => s.status)))
 

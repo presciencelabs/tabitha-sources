@@ -9,10 +9,16 @@
 
 	let { data }: PageProps = $props()
 
-	let phase1_text = $state(data.source.phase_1_encoding)
-	let source_entities = $state(data.source.parsed_semantic_encoding)
-	let noun_list = $state(data.source.noun_list)
-	const all_features = data.features
+	let phase1_text = $state('')
+	let source_entities = $state<PageSourceEntity[]>([])
+	let noun_list = $state<NounListEntry[]>([])
+	let all_features = $derived(data.features)
+
+	$effect(() => {
+		phase1_text = data.source.phase_1_encoding
+		source_entities = data.source.parsed_semantic_encoding
+		noun_list = data.source.noun_list
+	})
 
 	let is_checked = $state(false)
 	let checking = $state(false)
@@ -92,7 +98,7 @@
 <div class="flex flex-row flex-wrap max-w-full">
 	<Navigation nav_data={data.nav_data} url_end="/edit" />
 
-	<button onclick={ check_text } onchange={ text_changed } class="btn btn-primary ml-8" type="submit" disabled={checking}>
+	<button onclick={ check_text } class="btn btn-primary ml-8" type="submit" disabled={checking}>
 		Check
 		{#if checking}
 			<Icon icon="line-md:loading-twotone-loop" class="h-6 w-6" />
@@ -121,7 +127,7 @@
 <div>
 	<p class="label">Input Text</p>
 	<p>
-		<textarea bind:value={phase1_text} rows="3" class="textarea textarea-bordered textarea-lg w-4/5"></textarea>
+		<textarea bind:value={phase1_text} oninput={text_changed} rows="3" class="textarea textarea-bordered textarea-lg w-4/5"></textarea>
 	</p>
 </div>
 

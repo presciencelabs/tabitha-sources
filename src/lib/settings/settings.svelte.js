@@ -3,7 +3,7 @@
 const defaults = {
 	show_hover_popups: true,
 }
-export let view_settings = $state(defaults)
+export const view_settings = $state(defaults)
 
 /**
  * 

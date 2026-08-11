@@ -1,7 +1,10 @@
-<script>
+<script lang="ts">
 	import '$lib/app.css'
+	import type { Snippet } from 'svelte'
 
 	import { Brand, Search } from '$lib'
+
+	let { children }: { children?: Snippet } = $props()
 </script>
 
 <!-- layout not handled by daisyUI, https://daisyui.com/docs/layout-and-typography -->
@@ -13,7 +16,9 @@
 </header>
 
 <main class="mx-8 mt-8">
-	<slot />
+	{#if children}
+		{@render children()}
+	{/if}
 </main>
 
 <footer class="footer footer-horizontal mt-10 max-w-none bg-neutral p-10 text-neutral-content">

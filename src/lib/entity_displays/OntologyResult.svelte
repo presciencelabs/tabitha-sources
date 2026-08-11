@@ -1,10 +1,9 @@
-<script>
+<script lang="ts">
 	import { PUBLIC_ONTOLOGY_API_HOST } from '$env/static/public'
 	import { onMount } from 'svelte'
 	import HoverPopup from './HoverPopup.svelte'
 
-	/** @type {SourceConcept} */
-	export let data
+	let { data = $bindable() }: { data: SourceConcept } = $props()
 
 	onMount(async () => {
 		const { stem, sense, part_of_speech } = data
@@ -22,8 +21,7 @@
 			data.ontology_data = DEFAULT_DATA
 		}
 
-		/** @type {OntologyResult[]} */
-		const results = await response.json()
+		const results: OntologyResult[] = await response.json()
 		
 		// Use the result that exactly matches the original stem (eg. "lot" vs "Lot")
 		const result = results.find(result => result.stem === stem) ?? DEFAULT_DATA
