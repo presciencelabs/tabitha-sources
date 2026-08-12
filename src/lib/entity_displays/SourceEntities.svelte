@@ -78,7 +78,7 @@
 	}
 </script>
 
-<div class="@container inline-flex flex-wrap py-3 w-full">
+<div class="inline-flex flex-wrap py-3">
 	{#each source_entities as entity}
 		{@const i = entity.id}
 		{@const Component = component_filters.find(([filter]) => filter(entity))?.[1]}
