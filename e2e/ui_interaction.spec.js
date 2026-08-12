@@ -31,3 +31,16 @@ test('status lookup page renders status overview', async ({ page }) => {
 
 	await expect(page).toHaveURL(/\/lookup\/status\/Bible\/Genesis$/)
 })
+
+test('selecting word concept opens Constituent Inspector and loads ontology details', async ({ page }) => {
+	await page.goto('/Bible/John/3/16')
+
+	const conceptBadge = page.locator('button:has-text("person")').first()
+	await conceptBadge.click()
+
+	const sidebarHeading = page.locator('h3:has-text("Constituent Inspector")')
+	await expect(sidebarHeading).toBeVisible()
+
+	const conceptDetails = page.locator('summary:has-text("Concept Details")')
+	await expect(conceptDetails).toBeVisible()
+})
