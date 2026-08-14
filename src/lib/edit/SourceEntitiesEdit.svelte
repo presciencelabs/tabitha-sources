@@ -161,22 +161,21 @@
 				onfocus={() => entity_focus(i)}
 				onmouseleave={entity_mouseout}
 				onblur={() => {}}
-				onclick={e => open_entity_context_menu(e, i)}
-				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && open_entity_context_menu(e, i)}>
+				oncontextmenu={event => open_entity_context_menu(event, i)}>
 			<Component source_entity={entity} />
 		</div>
 	{/each}
 
 	{#if insert_context_menu_data.is_open}
 		<InsertEntityContextMenu
-				bind:source_entities={source_entities}
+				bind:source_entities
 				data={insert_context_menu_data}
 				onclose={close_insert_context_menu} />
 	{/if}
 
 	{#if entity_context_menu_data.is_open}
 		<EntityContextMenu
-				bind:source_entities={source_entities}
+				bind:source_entities
 				data={entity_context_menu_data}
 				onclose={close_entity_context_menu} />
 	{/if}
