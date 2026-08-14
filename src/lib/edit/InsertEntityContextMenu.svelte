@@ -5,6 +5,7 @@
 	import { DEFAULTS } from './default_entities'
 	import { page } from '$app/state'
 	import { fill_in_features } from '$lib/encoding/features'
+    import Page from '../../routes/+page.svelte';
 
 	interface Props {
 		source_entities: PageSourceEntity[]
@@ -40,8 +41,12 @@
 				value: end_map[entity.value],
 				boundary_category: entity.boundary_category,
 			}
+			if (parent) {
+				source_entities.splice(data.entity_id, 0, entity, end_entity)
+			} else {
+				source_entities.splice(data.entity_id, 0, entity, DEFAULTS.PERIOD, end_entity)
+			}
 
-			source_entities.splice(data.entity_id, 0, entity, end_entity)
 			onclose(true, data.entity_id)
 
 		} else {
