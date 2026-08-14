@@ -186,6 +186,20 @@ const default_phrasal: PageSourceEntity = {
 	concept: { stem: '', sense: '', part_of_speech: 'Phrasal' },
 }
 
+const default_period: PageSourceEntity = {
+	...defaults,
+	category: 'period',
+	category_abbr: 'period',
+	value: '.',
+}
+
+const default_paragraph: PageSourceEntity = {
+	...defaults,
+	category: 'Paragraph',
+	category_abbr: 'R',
+	value: '|',
+}
+
 export const DEFAULTS = {
 	EMPTY: defaults,
 	CLAUSE_MAIN: default_main_clause,
@@ -209,4 +223,6 @@ export const DEFAULTS = {
 	CONJUNCTION: default_conjunction,
 	PHRASAL: default_phrasal,
 	PARTICLE: default_particle,
+	PERIOD: default_period,
+	PARAGRAPH: default_paragraph,
 }

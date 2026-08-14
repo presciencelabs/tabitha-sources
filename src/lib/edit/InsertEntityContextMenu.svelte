@@ -151,6 +151,24 @@
 				</div>
 			</li>
 		{/if}
+		{#if !parent || parent.category === 'Clause'}
+			<li>
+				<div class="relative" onmouseenter={() => submenu = 'other'}>
+					<button>Other</button>
+					{#if submenu === 'other'}
+						<div class="card bg-base-100 min-w-50 shadow p-2 absolute left-full top-0 ml-2">
+							<ul>
+								{#if !parent}
+									<li><button onclick={() => insert_entity(DEFAULTS.PARAGRAPH)}>paragraph</button></li>
+								{:else if parent.category === 'Clause'}
+									<li><button onclick={() => insert_entity(DEFAULTS.PERIOD)}>period</button></li>
+								{/if}
+							</ul>
+						</div>
+					{/if}
+				</div>
+			</li>
+		{/if}
 	</ul>
 </div>
 
