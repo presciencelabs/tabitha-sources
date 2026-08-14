@@ -141,22 +141,25 @@
 	}
 </script>
 
+{#snippet insert_button(i: number)}
+	<button class="btn btn-xs mt-4 h-12 w-4 text-lg {insert_context_menu_data.entity_id === i ? "opacity-100" : "opacity-0"} focus:opacity-100 hover:opacity-100 transition-opacity duration-150"
+		onclick={e => open_insert_context_menu(e, i)}
+		aria-label="Insert Constituent">
+		+
+	</button>
+{/snippet}
+
 <div class="inline-flex flex-wrap py-3">
 	{#each source_entities as entity}
 		{@const i = entity.id}
 		{@const Component = component_filters.find(([filter]) => filter(entity))?.[1]}
 
 		<div class="{insert_button_in_range(i, hover_range) || insert_button_in_range(i, select_range) ? entity_highlights[i] : ''}">
-			<button class="btn btn-xs mt-4 h-12 w-4 text-lg {insert_context_menu_data.entity_id === i ? "opacity-100" : "opacity-0"} hover:opacity-100 transition-opacity duration-150"
-				onclick={e => open_insert_context_menu(e, i)}
-				aria-label="Insert Constituent">
-				+
-			</button>
+			{@render insert_button(i)}
 		</div>
 
 		<div role="button" tabindex="0" class="id-{i} cursor-pointer content-center h-20 {entity_highlights[i]}"
-				onclick={() => entity_focus(i)}
-				onkeydown={e => (e.key === 'Enter' || e.key === ' ') && entity_focus(i)}
+				onkeydown={e => e.key === 'Enter' && entity_focus(i)}
 				onmouseenter={() => entity_mouseover(i)}
 				onfocus={() => entity_focus(i)}
 				onmouseleave={entity_mouseout}
@@ -165,6 +168,10 @@
 			<Component source_entity={entity} />
 		</div>
 	{/each}
+
+	<div>
+		{@render insert_button(source_entities.length)}
+	</div>
 
 	{#if insert_context_menu_data.is_open}
 		<InsertEntityContextMenu
