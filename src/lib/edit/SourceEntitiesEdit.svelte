@@ -142,9 +142,12 @@
 </script>
 
 {#snippet insert_button(i: number)}
-	<button class="btn btn-xs mt-4 h-12 w-4 text-lg {insert_context_menu_data.entity_id === i ? "opacity-100" : "opacity-0"} focus:opacity-100 hover:opacity-100 transition-opacity duration-150"
+	{@const opacity_classes = insert_context_menu_data.entity_id === i ? 'opacity-100' : 'opacity-0 focus:opacity-100 hover:opacity-100'}
+	<button
 		onclick={e => open_insert_context_menu(e, i)}
-		aria-label="Insert Constituent">
+		aria-label="Insert Constituent"
+		class="btn btn-xs btn-primary mt-4 h-12 w-4 text-lg {opacity_classes} transition-opacity duration-150"
+	>
 		+
 	</button>
 {/snippet}
