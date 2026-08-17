@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { is_boundary_start } from '$lib/encoding/entity_filters'
 	import ConceptDialog from '$lib/ConceptDialog.svelte'
 	import { entity_clipboard } from './clipboard.svelte'
 	import { DEFAULTS } from './default_entities'
 	import { page } from '$app/state'
 	import { fill_in_features } from '$lib/encoding/features'
-    import Page from '../../routes/+page.svelte';
 
 	interface Props {
 		source_entities: PageSourceEntity[]
@@ -24,38 +22,50 @@
 		return source_entities[entity.parent_id] || null
 	})
 
-	function insert_entity(entity: PageSourceEntity) {
-		const { feature_codes, features } = fill_in_features(entity, page.data.features as FeatureMap)
-		entity.feature_codes = feature_codes
-		entity.features = features
+	function insert_entities(entities: PageSourceEntity[]) {
+		const new_entities = entities.map(entity => ({
+			...entity,
+			...fill_in_features(entity, page.data.features as FeatureMap),
+		}))
 		
-		if (is_boundary_start(entity)) {
-			const end_map: Record<string, string> = {
-				'{': '}',
-				'[': ']',
-				'(': ')',
-			}
+		source_entities.splice(data.entity_id, 0, ...new_entities)
+		onclose(true, data.entity_id)
+	}
 
-			const end_entity: PageSourceEntity = {
-				...DEFAULTS.EMPTY,
-				value: end_map[entity.value],
-				boundary_category: entity.boundary_category,
-			}
-			if (parent) {
-				source_entities.splice(data.entity_id, 0, entity, end_entity)
-			} else {
-				source_entities.splice(data.entity_id, 0, entity, DEFAULTS.PERIOD, end_entity)
-			}
+	function insert_clause(clause: PageSourceEntity) {
+		insert_entities([
+			clause,
+			...(clause.value === '{' ? [DEFAULTS.PERIOD] : []),
+			boundary_end(clause),
+		])
+	}
 
-			onclose(true, data.entity_id)
+	function insert_phrase(phrase: PageSourceEntity, concept: PageSourceEntity) {
+		insert_entities([
+			phrase,
+			...(concept?.concept?.stem ? [concept] : []),
+			boundary_end(phrase),
+		])
+	}
 
-		} else {
-			source_entities.splice(data.entity_id, 0, entity)
-			onclose(true, data.entity_id)
+	function boundary_end(boundary_start: PageSourceEntity): PageSourceEntity {
+		const end_map: Record<string, string> = {
+			'{': '}',
+			'[': ']',
+			'(': ')',
+		}
+		return {
+			...DEFAULTS.EMPTY,
+			value: end_map[boundary_start.value] || ')',
+			boundary_category: boundary_start.boundary_category,
 		}
 	}
 
-	function paste_entity() {
+	function insert_entity(entity: PageSourceEntity) {
+		insert_entities([entity])
+	}
+
+	function paste_entities() {
 		const new_entities = entity_clipboard.paste()
 		if (new_entities !== null) {
 			source_entities.splice(data.entity_id, 0, ...new_entities)
@@ -67,19 +77,150 @@
 	
 	let dialog_open = $state(false)
 	let new_concept_entity = $state<PageSourceEntity | null>(null)
-	function open_concept_dialog(entity: PageSourceEntity) {
-		new_concept_entity = entity
+	let new_phrase_entity = $state<PageSourceEntity | null>(null)
+
+	function open_concept_dialog(concept: PageSourceEntity, phrase?: PageSourceEntity) {
+		new_concept_entity = concept
+		new_phrase_entity = phrase || null
 		dialog_open = true
 	}
 	function close_concept_dialog() {
 		dialog_open = false
 
-		if (new_concept_entity?.concept?.stem) {
+		if (new_phrase_entity && new_concept_entity) {
+			insert_phrase(new_phrase_entity, new_concept_entity)
+		} else if (new_concept_entity?.concept?.stem) {
 			insert_entity(new_concept_entity)
 		} else {
 			onclose(false)
 		}
 	}
+
+	type MenuItem = {
+		label: string
+		action: () => void
+		condition?: boolean
+	}
+	let menu_data: [string, MenuItem[]][] = $derived([
+		['Clause', [
+			{
+				label: 'Main Clause',
+				action: () => insert_clause(DEFAULTS.CLAUSE_MAIN),
+				condition: !parent,
+			},
+			{
+				label: 'Adverbial Clause',
+				action: () => insert_clause(DEFAULTS.CLAUSE_ADVERBIAL),
+				condition: parent?.category === 'Clause',
+			},
+			{
+				label: 'Patient (Object Complement)',
+				action: () => insert_clause(DEFAULTS.CLAUSE_PATIENT),
+				condition: parent?.category === 'Clause',
+			},
+			{
+				label: 'Agent (Subject Complement)',
+				action: () => insert_clause(DEFAULTS.CLAUSE_AGENT),
+				condition: parent?.category === 'Clause',
+			},
+			{
+				label: 'Closing Quotation Frame',
+				action: () => insert_clause(DEFAULTS.CLAUSE_CLOSE_QUOTE),
+				condition: parent?.category === 'Clause',
+			},
+			{
+				label: 'Relative Clause',
+				action: () => insert_clause(DEFAULTS.CLAUSE_RELATIVE),
+				condition: parent?.category === 'Noun Phrase',
+			},
+			{
+				label: 'Adjectival Complement',
+				action: () => insert_clause(DEFAULTS.CLAUSE_ADJ_PATIENT),
+				condition: parent?.category === 'Adjective Phrase',
+			},
+		]],
+		['Phrase', [
+			{
+				label: 'Noun Phrase',
+				action: () => open_concept_dialog(DEFAULTS.NOUN, DEFAULTS.NOUN_PHRASE),
+				condition: !!parent && parent.category !== 'Verb Phrase',
+			},
+			{
+				label: 'Verb Phrase',
+				action: () => open_concept_dialog(DEFAULTS.VERB, DEFAULTS.VERB_PHRASE),
+				condition: parent?.category === 'Clause',
+			},
+			{
+				label: 'Adjective Phrase',
+				action: () => open_concept_dialog(DEFAULTS.ADJECTIVE, DEFAULTS.ADJECTIVE_PHRASE_PREDICATIVE),
+				condition: parent?.category === 'Clause',
+			},
+			{
+				label: 'Adjective Phrase',
+				action: () => open_concept_dialog(DEFAULTS.ADJECTIVE, DEFAULTS.ADJECTIVE_PHRASE),
+				condition: !!parent && parent.category !== 'Clause' && parent.category !== 'Verb Phrase',
+			},
+			{
+				label: 'Adverb Phrase',
+				action: () => open_concept_dialog(DEFAULTS.ADVERB, DEFAULTS.ADVERB_PHRASE),
+				condition: !!parent && parent.category !== 'Verb Phrase',
+			},
+		]],
+		['Concept', [
+			{
+				label: 'Noun',
+				action: () => open_concept_dialog(DEFAULTS.NOUN),
+				condition: parent?.category === 'Noun Phrase',
+			},
+			{
+				label: 'Verb',
+				action: () => open_concept_dialog(DEFAULTS.VERB),
+				condition: parent?.category === 'Verb Phrase',
+			},
+			{
+				label: 'Adjective',
+				action: () => open_concept_dialog(DEFAULTS.ADJECTIVE),
+				condition: parent?.category === 'Adjective Phrase',
+			},
+			{
+				label: 'Adverb',
+				action: () => open_concept_dialog(DEFAULTS.ADVERB),
+				condition: parent?.category === 'Adverb Phrase',
+			},
+			{
+				label: 'Adposition',
+				action: () => open_concept_dialog(DEFAULTS.ADPOSITION),
+				condition: !!parent,
+			},
+			{
+				label: 'Conjunction',
+				action: () => open_concept_dialog(DEFAULTS.CONJUNCTION),
+				condition: !!parent,
+			},
+			{
+				label: 'Particle',
+				action: () => open_concept_dialog(DEFAULTS.PARTICLE),
+				condition: !!parent,
+			},
+			{
+				label: 'Phrasal',
+				action: () => open_concept_dialog(DEFAULTS.PHRASAL),
+				condition: !!parent,
+			},
+		]],
+		['Other', [
+			{
+				label: 'paragraph',
+				action: () => insert_entity(DEFAULTS.PARAGRAPH),
+				condition: !parent,
+			},
+			{
+				label: 'period',
+				action: () => insert_entity(DEFAULTS.PERIOD),
+				condition: parent?.category === 'Clause',
+			},
+		]],
+	])
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -89,91 +230,29 @@
 		onmouseleave={() => !dialog_open && onclose(false)}>
 	<ul class="menu w-full">
 		{#if entity_clipboard.has_value()}
-			<li><button onclick={paste_entity}>Paste</button></li>
+			<li><button onclick={paste_entities}>Paste</button></li>
 		{/if}
-		{#if !parent || ['Clause', 'Noun Phrase', 'Adjective Phrase'].includes(parent.category)}
-			<li>
-				<div class="relative" onmouseenter={() => submenu = 'clause'}>
-					<button>Clause</button>
-					{#if submenu === 'clause'}
-						<div class="card bg-base-100 min-w-50 shadow p-2 absolute left-full top-0 ml-2">
-							<ul>
-								{#if !parent}
-									<li><button onclick={() => insert_entity(DEFAULTS.CLAUSE_MAIN)}>Main Clause</button></li>
-								{:else if parent.category === 'Clause'}
-									<li><button onclick={() => insert_entity(DEFAULTS.CLAUSE_ADVERBIAL)}>Adverbial Clause</button></li>
-									<li><button onclick={() => insert_entity(DEFAULTS.CLAUSE_PATIENT)}>Patient (Object Complement)</button></li>
-									<li><button onclick={() => insert_entity(DEFAULTS.CLAUSE_AGENT)}>Agent (Subject Complement)</button></li>
-									<li><button onclick={() => insert_entity(DEFAULTS.CLAUSE_CLOSE_QUOTE)}>Closing Quotation Frame</button></li>
-								{:else if parent.category === 'Noun Phrase'}
-									<li><button onclick={() => insert_entity(DEFAULTS.CLAUSE_RELATIVE)}>Relative Clause</button></li>
-								{:else if parent.category === 'Adjective Phrase'}
-									<li><button onclick={() => insert_entity(DEFAULTS.CLAUSE_ADJ_PATIENT)}>Adjectival Complement</button></li>
-								{/if}
-							</ul>
-						</div>
-					{/if}
-				</div>
-			</li>
-		{/if}
-		{#if parent}
-			<li>
-				<div class="relative" onmouseenter={() => submenu = 'phrase'}>
-					<button>Phrase</button>
-					{#if submenu === 'phrase'}
-						<div class="card bg-base-100 min-w-50 shadow p-2 absolute left-full top-0 ml-2">
-							<ul>
-								<li><button onclick={() => insert_entity(DEFAULTS.NOUN_PHRASE)}>Noun Phrase</button></li>
-								<li><button onclick={() => insert_entity(DEFAULTS.VERB_PHRASE)}>Verb Phrase</button></li>
-								{#if parent.category === 'Clause'}
-									<li><button onclick={() => insert_entity(DEFAULTS.ADJECTIVE_PHRASE_PREDICATIVE)}>Adjective Phrase</button></li>
-								{:else}
-									<li><button onclick={() => insert_entity(DEFAULTS.ADJECTIVE_PHRASE)}>Adjective Phrase</button></li>
-								{/if}
-								<li><button onclick={() => insert_entity(DEFAULTS.ADVERB_PHRASE)}>Adverb Phrase</button></li>
-							</ul>
-						</div>
-					{/if}
-				</div>
-			</li>
-			<li>
-				<div class="relative" onmouseenter={() => submenu = 'concept'}>
-					<button>Concept</button>
-					{#if submenu === 'concept'}
-						<div class="card bg-base-100 min-w-50 shadow p-2 absolute left-full top-0 ml-2">
-							<ul>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.NOUN)}>Noun</button></li>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.VERB)}>Verb</button></li>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.ADJECTIVE)}>Adjective</button></li>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.ADVERB)}>Adverb</button></li>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.ADPOSITION)}>Adposition</button></li>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.CONJUNCTION)}>Conjunction</button></li>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.PARTICLE)}>Particle</button></li>
-								<li><button onclick={() => open_concept_dialog(DEFAULTS.PHRASAL)}>Phrasal</button></li>
-							</ul>
-						</div>
-					{/if}
-				</div>
-			</li>
-		{/if}
-		{#if !parent || parent.category === 'Clause'}
-			<li>
-				<div class="relative" onmouseenter={() => submenu = 'other'}>
-					<button>Other</button>
-					{#if submenu === 'other'}
-						<div class="card bg-base-100 min-w-50 shadow p-2 absolute left-full top-0 ml-2">
-							<ul>
-								{#if !parent}
-									<li><button onclick={() => insert_entity(DEFAULTS.PARAGRAPH)}>paragraph</button></li>
-								{:else if parent.category === 'Clause'}
-									<li><button onclick={() => insert_entity(DEFAULTS.PERIOD)}>period</button></li>
-								{/if}
-							</ul>
-						</div>
-					{/if}
-				</div>
-			</li>
-		{/if}
+		{#each menu_data as [menu_label, items]}
+			{@const visible = items.some(item => item.condition === undefined || item.condition)}
+			{#if visible}
+				<li>
+					<div class="relative" onmouseenter={() => submenu = menu_label}>
+						<button>{menu_label}</button>
+						{#if submenu === menu_label}
+							<div class="card bg-base-100 min-w-50 shadow p-2 absolute left-full top-0 ml-2">
+								<ul>
+									{#each items as { label, action, condition }}
+										{#if condition === undefined || condition}
+											<li><button onclick={action}>{label}</button></li>
+										{/if}
+									{/each}
+								</ul>
+							</div>
+						{/if}
+					</div>
+				</li>
+			{/if}
+		{/each}
 	</ul>
 </div>
 
