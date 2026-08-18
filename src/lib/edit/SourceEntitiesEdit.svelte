@@ -49,14 +49,13 @@
 		y: 0,
 	})
 
-	function open_entity_context_menu(event: MouseEvent, entity_id: number) {
+	function open_entity_context_menu(event: UIEvent, entity_id: number) {
 		event.stopPropagation()
 		event.preventDefault()
 		entity_context_menu_data = {
 			is_open: true,
 			entity_id,
-			x: event.clientX,
-			y: event.clientY,
+			...get_menu_location(event),
 		}
 	}
 
@@ -72,14 +71,13 @@
 		y: 0,
 	})
 
-	function open_insert_context_menu(event: any, entity_id: number) {
+	function open_insert_context_menu(event: UIEvent, entity_id: number) {
 		event.stopPropagation()
 		event.preventDefault()
 		insert_context_menu_data = {
 			is_open: true,
 			entity_id,
-			x: event.clientX,
-			y: event.clientY,
+			...get_menu_location(event),
 		}
 	}
 
@@ -97,6 +95,21 @@
 			} else if (id_to_select === -1) {
 				on_entity_select(null)
 			}
+		}
+	}
+
+	function get_menu_location(event: UIEvent): { x: number, y: number } {
+		if (event instanceof MouseEvent) {
+			return {
+				x: event.clientX,
+				y: event.clientY,
+			}
+		}
+
+		const element_rect = (event.target as HTMLElement).getBoundingClientRect()
+		return {
+			x: element_rect.left,
+			y: element_rect.bottom,
 		}
 	}
 
@@ -145,6 +158,7 @@
 	{@const opacity_classes = insert_context_menu_data.entity_id === i ? 'opacity-100' : 'opacity-0 focus:opacity-100 hover:opacity-100'}
 	<button
 		onclick={e => open_insert_context_menu(e, i)}
+		onkeydown={e => e.key === 'Enter' && open_insert_context_menu(e, i)}
 		aria-label="Insert Constituent"
 		class="btn btn-xs btn-primary mt-4 h-12 w-4 text-lg {opacity_classes} transition-opacity duration-150"
 	>
@@ -161,13 +175,14 @@
 			{@render insert_button(i)}
 		</div>
 
-		<div role="button" tabindex="0" class="id-{i} cursor-pointer content-center h-20 {entity_highlights[i]}"
-				onkeydown={e => e.key === 'Enter' && entity_focus(i)}
-				onmouseenter={() => entity_mouseover(i)}
-				onfocus={() => entity_focus(i)}
-				onmouseleave={entity_mouseout}
-				onblur={() => {}}
-				oncontextmenu={event => open_entity_context_menu(event, i)}>
+		<div role="button" tabindex="0"
+			onclick={() => entity_focus(i)}
+			onkeydown={e => e.key === 'Enter' && entity_focus(i)}
+			onmouseenter={() => entity_mouseover(i)}
+			onmouseleave={entity_mouseout}
+			oncontextmenu={e => open_entity_context_menu(e, i)}
+			class="id-{i} cursor-pointer content-center h-20 {entity_highlights[i]}"
+		>
 			<Component source_entity={entity} />
 		</div>
 	{/each}
