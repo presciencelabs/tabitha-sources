@@ -149,6 +149,42 @@
 		}
 	}
 
+	let dragged_entity = $state<number | null>(null)
+	function paste_entity(i: number) {
+		if (dragged_entity === null) {
+			return
+		}
+
+		const range_length = get_range_length(dragged_entity)
+		const insert_pos = get_insert_position(i, dragged_entity, range_length)
+		const entities = source_entities.splice(dragged_entity, range_length)
+		source_entities.splice(insert_pos, 0, ...entities)
+
+		structure_entities(source_entities)
+		entity_focus(insert_pos)
+
+		dragged_entity = null
+
+		function get_range_length(i: number) {
+			if (is_boundary_start(source_entities[i])) {
+				const last_child_index = source_entities.findLastIndex(entity => entity.parent_id === i)
+				return last_child_index - i + 1
+			} else {
+				return 1
+			}
+		}
+
+		function get_insert_position(drop_index: number, drag_index: number, range_length: number) {
+			if (drop_index < drag_index) {
+				return drop_index
+			} else if (drop_index < (drag_index + range_length)) {
+				return drag_index
+			} else {
+				return drop_index - range_length
+			}
+		}
+	}
+
 	function insert_button_in_range(i: number, range: IndexRange|null) {
 		return !!range?.length && (i > range[0] && i <= range[range.length - 1])
 	}
@@ -159,6 +195,8 @@
 	<button
 		onclick={e => open_insert_context_menu(e, i)}
 		onkeydown={e => e.key === 'Enter' && open_insert_context_menu(e, i)}
+		ondragover={e => e.preventDefault()}
+		ondrop={() => paste_entity(i)}
 		aria-label="Insert Constituent"
 		class="btn btn-xs btn-primary mt-4 h-12 w-4 text-lg {opacity_classes} transition-opacity duration-150"
 	>
@@ -176,11 +214,15 @@
 		</div>
 
 		<div role="button" tabindex="0"
+			draggable="true"
 			onclick={() => entity_focus(i)}
 			onkeydown={e => e.key === 'Enter' && entity_focus(i)}
 			onmouseenter={() => entity_mouseover(i)}
 			onmouseleave={entity_mouseout}
 			oncontextmenu={e => open_entity_context_menu(e, i)}
+			ondragstart={() => dragged_entity = i}
+			ondragover={e => e.preventDefault()}
+			ondrop={() => paste_entity(i)}
 			class="id-{i} cursor-pointer content-center h-20 {entity_highlights[i]}"
 		>
 			<Component source_entity={entity} />
