@@ -7,6 +7,7 @@
 	import InsertEntityContextMenu from './InsertEntityContextMenu.svelte'
 	import { is_boundary_end, is_boundary_start } from '$lib/encoding/entity_filters'
 	import { structure_entities } from '$lib/encoding/structured'
+	import { view_settings, set_settings } from '$lib/settings/settings.svelte.js'
 
 	type IndexRange = [number, number]
 
@@ -87,6 +88,10 @@
 		close_context_menu(recalculate, id_to_select)
 	}
 
+	function insert_button_in_range(i: number, range: IndexRange|null) {
+		return !!range?.length && (i > range[0] && i <= range[range.length - 1])
+	}
+
 	function close_context_menu(recalculate: boolean, id_to_select?: number) {
 		if (recalculate) {
 			structure_entities(source_entities)
@@ -150,6 +155,16 @@
 	}
 
 	let dragged_entity = $state<number | null>(null)
+	let previous_popup_setting = $state(false)
+
+	function drag_entity(i: number) {
+		dragged_entity = i
+
+		// temporarily hide any hover popup so that the ghost drag item doesn't include it
+		previous_popup_setting = view_settings.show_hover_popups
+		set_settings({ show_hover_popups: false })
+	}
+
 	function paste_entity(i: number) {
 		if (dragged_entity === null) {
 			return
@@ -164,6 +179,7 @@
 		entity_focus(insert_pos)
 
 		dragged_entity = null
+		set_settings({ show_hover_popups: previous_popup_setting })
 
 		function get_range_length(i: number) {
 			if (is_boundary_start(source_entities[i])) {
@@ -183,10 +199,6 @@
 				return drop_index - range_length
 			}
 		}
-	}
-
-	function insert_button_in_range(i: number, range: IndexRange|null) {
-		return !!range?.length && (i > range[0] && i <= range[range.length - 1])
 	}
 </script>
 
@@ -220,7 +232,7 @@
 			onmouseenter={() => entity_mouseover(i)}
 			onmouseleave={entity_mouseout}
 			oncontextmenu={e => open_entity_context_menu(e, i)}
-			ondragstart={() => dragged_entity = i}
+			ondragstart={() => drag_entity(i)}
 			ondragover={e => e.preventDefault()}
 			ondrop={() => paste_entity(i)}
 			class="id-{i} cursor-pointer content-center h-20 {entity_highlights[i]}"
