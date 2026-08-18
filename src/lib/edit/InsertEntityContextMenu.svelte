@@ -14,12 +14,12 @@
 
 	let submenu = $state<string | null>(null)
 
-	let parent = $derived.by(() => {
+	let parent_category = $derived.by(() => {
 		const entity = source_entities[data.entity_id]
 		if (!entity || entity.parent_id === -1) {
 			return null
 		}
-		return source_entities[entity.parent_id] || null
+		return source_entities[entity.parent_id]?.category || null
 	})
 
 	function insert_entities(entities: PageSourceEntity[]) {
@@ -30,6 +30,10 @@
 		
 		source_entities.splice(data.entity_id, 0, ...new_entities)
 		onclose(true, data.entity_id)
+	}
+
+	function insert_entity(entity: PageSourceEntity) {
+		insert_entities([entity])
 	}
 
 	function insert_clause(clause: PageSourceEntity) {
@@ -59,10 +63,6 @@
 			value: end_map[boundary_start.value] || ')',
 			boundary_category: boundary_start.boundary_category,
 		}
-	}
-
-	function insert_entity(entity: PageSourceEntity) {
-		insert_entities([entity])
 	}
 
 	function paste_entities() {
@@ -99,125 +99,125 @@
 	type MenuItem = {
 		label: string
 		action: () => void
-		condition?: boolean
+		condition: boolean
 	}
 	let menu_data: [string, MenuItem[]][] = $derived([
 		['Clause', [
 			{
 				label: 'Main Clause',
 				action: () => insert_clause(DEFAULTS.CLAUSE_MAIN),
-				condition: !parent,
+				condition: !parent_category,
 			},
 			{
 				label: 'Adverbial Clause',
 				action: () => insert_clause(DEFAULTS.CLAUSE_ADVERBIAL),
-				condition: parent?.category === 'Clause',
+				condition: parent_category === 'Clause',
 			},
 			{
 				label: 'Patient (Object Complement)',
 				action: () => insert_clause(DEFAULTS.CLAUSE_PATIENT),
-				condition: parent?.category === 'Clause',
+				condition: parent_category === 'Clause',
 			},
 			{
 				label: 'Agent (Subject Complement)',
 				action: () => insert_clause(DEFAULTS.CLAUSE_AGENT),
-				condition: parent?.category === 'Clause',
+				condition: parent_category === 'Clause',
 			},
 			{
 				label: 'Closing Quotation Frame',
 				action: () => insert_clause(DEFAULTS.CLAUSE_CLOSE_QUOTE),
-				condition: parent?.category === 'Clause',
+				condition: parent_category === 'Clause',
 			},
 			{
 				label: 'Relative Clause',
 				action: () => insert_clause(DEFAULTS.CLAUSE_RELATIVE),
-				condition: parent?.category === 'Noun Phrase',
+				condition: parent_category === 'Noun Phrase',
 			},
 			{
 				label: 'Adjectival Complement',
 				action: () => insert_clause(DEFAULTS.CLAUSE_ADJ_PATIENT),
-				condition: parent?.category === 'Adjective Phrase',
+				condition: parent_category === 'Adjective Phrase',
 			},
 		]],
 		['Phrase', [
 			{
 				label: 'Noun Phrase',
 				action: () => open_concept_dialog(DEFAULTS.NOUN, DEFAULTS.NOUN_PHRASE),
-				condition: !!parent && parent.category !== 'Verb Phrase',
+				condition: !!parent_category && parent_category !== 'Verb Phrase',
 			},
 			{
 				label: 'Verb Phrase',
 				action: () => open_concept_dialog(DEFAULTS.VERB, DEFAULTS.VERB_PHRASE),
-				condition: parent?.category === 'Clause',
+				condition: parent_category === 'Clause',
 			},
 			{
 				label: 'Adjective Phrase',
 				action: () => open_concept_dialog(DEFAULTS.ADJECTIVE, DEFAULTS.ADJECTIVE_PHRASE_PREDICATIVE),
-				condition: parent?.category === 'Clause',
+				condition: parent_category === 'Clause',
 			},
 			{
 				label: 'Adjective Phrase',
 				action: () => open_concept_dialog(DEFAULTS.ADJECTIVE, DEFAULTS.ADJECTIVE_PHRASE),
-				condition: !!parent && parent.category !== 'Clause' && parent.category !== 'Verb Phrase',
+				condition: !!parent_category && parent_category !== 'Clause' && parent_category !== 'Verb Phrase',
 			},
 			{
 				label: 'Adverb Phrase',
 				action: () => open_concept_dialog(DEFAULTS.ADVERB, DEFAULTS.ADVERB_PHRASE),
-				condition: !!parent && parent.category !== 'Verb Phrase',
+				condition: !!parent_category && parent_category !== 'Verb Phrase',
 			},
 		]],
 		['Concept', [
 			{
 				label: 'Noun',
 				action: () => open_concept_dialog(DEFAULTS.NOUN),
-				condition: parent?.category === 'Noun Phrase',
+				condition: parent_category === 'Noun Phrase',
 			},
 			{
 				label: 'Verb',
 				action: () => open_concept_dialog(DEFAULTS.VERB),
-				condition: parent?.category === 'Verb Phrase',
+				condition: parent_category === 'Verb Phrase',
 			},
 			{
 				label: 'Adjective',
 				action: () => open_concept_dialog(DEFAULTS.ADJECTIVE),
-				condition: parent?.category === 'Adjective Phrase',
+				condition: parent_category === 'Adjective Phrase',
 			},
 			{
 				label: 'Adverb',
 				action: () => open_concept_dialog(DEFAULTS.ADVERB),
-				condition: parent?.category === 'Adverb Phrase',
+				condition: parent_category === 'Adverb Phrase',
 			},
 			{
 				label: 'Adposition',
 				action: () => open_concept_dialog(DEFAULTS.ADPOSITION),
-				condition: !!parent,
+				condition: !!parent_category,
 			},
 			{
 				label: 'Conjunction',
 				action: () => open_concept_dialog(DEFAULTS.CONJUNCTION),
-				condition: !!parent,
+				condition: !!parent_category,
 			},
 			{
 				label: 'Particle',
 				action: () => open_concept_dialog(DEFAULTS.PARTICLE),
-				condition: !!parent,
+				condition: !!parent_category,
 			},
 			{
 				label: 'Phrasal',
 				action: () => open_concept_dialog(DEFAULTS.PHRASAL),
-				condition: !!parent,
+				condition: !!parent_category,
 			},
 		]],
 		['Other', [
 			{
 				label: 'paragraph',
 				action: () => insert_entity(DEFAULTS.PARAGRAPH),
-				condition: !parent,
+				condition: !parent_category,
 			},
 			{
 				label: 'period',
 				action: () => insert_entity(DEFAULTS.PERIOD),
-				condition: parent?.category === 'Clause',
+				condition: parent_category === 'Clause',
 			},
 		]],
 	])
@@ -227,23 +227,28 @@
 <div onclick={e => e.stopPropagation()}
 	onkeydown={e => e.stopPropagation()}
 	onmouseleave={() => !dialog_open && onclose(false)}
-	class="card shadow-lg bg-base-100 min-w-50" style="position: fixed; left: {data.x}px; top: {data.y}px; z-index: 60;"
+	class="card shadow-lg bg-base-100 min-w-40" style="position: fixed; left: {data.x}px; top: {data.y}px; z-index: 60;"
 >
 	<ul class="menu w-full">
 		{#if entity_clipboard.has_value()}
-			<li><button onclick={paste_entities}>Paste</button></li>
+			<li>
+				<button onclick={paste_entities} onmouseenter={() => submenu = null}>
+					Paste
+				</button>
+			</li>
+			<li></li>
 		{/if}
 		{#each menu_data as [menu_label, items]}
-			{@const visible = items.some(item => item.condition === undefined || item.condition)}
+			{@const visible = items.some(item => item.condition)}
 			{#if visible}
 				<li>
 					<div class="relative" onmouseenter={() => submenu = menu_label}>
-						<button>{menu_label}</button>
+						<button class="cursor-pointer">{menu_label}</button>
 						{#if submenu === menu_label}
-							<div class="card bg-base-100 min-w-50 shadow p-2 absolute left-full top-0 ml-2">
-								<ul>
+							<div class="card bg-base-100 min-w-50 ml-2 p-2 shadow absolute left-full top-0">
+								<ul class="ml-0 pl-0 before:hidden">
 									{#each items as { label, action, condition }}
-										{#if condition === undefined || condition}
+										{#if condition}
 											<li><button onclick={action}>{label}</button></li>
 										{/if}
 									{/each}
